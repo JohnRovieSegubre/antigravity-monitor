@@ -1,0 +1,17 @@
+# Security
+.agent/secure/
+*.json
+!package.json
+!skill.json
+
+# Temporary / Logs
+.agent/inbox/completed/
+.agent/inbox/failed/
+.agent/inbox/logs/
+.agent/inbox/*.md
+.agent/inbox/*.txt
+__pycache__/
+*.log
+
+# Editor
+.vscode/
