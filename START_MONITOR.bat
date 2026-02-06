@@ -1,5 +1,5 @@
 @echo off
-title Antigravity Always-On Monitor
-echo Starting Antigravity Monitor...
-python "c:\Users\rovie segubre\.gemini\antigravity\playground\obsidian-trifid\scripts\antigravity_monitor.py"
+title Antigravity V2 Watchdog
+echo Starting Antigravity V2 (Auto-Repair Enabled)...
+python "c:\Users\rovie segubre\.gemini\antigravity\playground\obsidian-trifid\scripts\watchdog.py"
 pause

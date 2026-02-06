@@ -2,125 +2,173 @@ import os
 import time
 import shutil
 import logging
-from pathlib import Path
+import json
+import threading
 import subprocess
+from pathlib import Path
 
 # --- Configuration ---
+# Detect workspace dynamically or use hardcoded if needed
 WORKSPACE_DIR = Path(r"c:\Users\rovie segubre\.gemini\antigravity\playground\obsidian-trifid")
 INBOX_DIR = WORKSPACE_DIR / ".agent" / "inbox"
 COMPLETED_DIR = INBOX_DIR / "completed"
 FAILED_DIR = INBOX_DIR / "failed"
 LOGS_DIR = INBOX_DIR / "logs"
+ACTIONS_FILE = WORKSPACE_DIR / ".agent" / "actions.json"
 
-POLL_INTERVAL = 5  # Seconds
+POLL_INTERVAL = 3  # Faster polling since we are async
 
 # --- Logging Setup ---
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
+    format='%(asctime)s [%(levelname)s] [%(threadName)s] %(message)s',
     handlers=[
-        logging.FileHandler(LOGS_DIR / "monitor.log", encoding='utf-8'),
+        logging.FileHandler(LOGS_DIR / "monitor_v2.log", encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
 
-def wake_up_antigravity(message):
-    """
-    Injects a message into the active window using PowerShell SendKeys.
-    This simulates the user typing to wake up the AI.
-    """
-    logging.info(f"Configuring Wake-On-Lan: '{message}'")
-    
-    # PowerShell script to type keys
-    # We use a slight delay to ensure the window captures it if focused.
-    # Note: The user MUST have the chat window focused for this to work perfectly.
-    ps_script = f"""
-    Add-Type -AssemblyName System.Windows.Forms
-    Start-Sleep -Milliseconds 1000
-    # Try to switch back to the previous window (Alt+Tab)
-    [System.Windows.Forms.SendKeys]::SendWait('%{{TAB}}')
-    Start-Sleep -Milliseconds 500
-    [System.Windows.Forms.SendKeys]::SendWait('{message}')
-    [System.Windows.Forms.SendKeys]::SendWait('{{ENTER}}')
-    """
-    
-    try:
-        subprocess.run(["powershell", "-Command", ps_script], check=True)
-        logging.info("Keystrokes sent successfully.")
-    except Exception as e:
-        logging.error(f"Failed to send keys: {e}")
+class AntigravityMonitor:
+    def __init__(self):
+        self.actions = {}
+        self.load_actions()
+        self.ensure_dirs()
 
-def process_task(task_file):
-    logging.info(f"New task detected: {task_file.name}")
-    
-    try:
-        # 1. Read the task
-        with open(task_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-            
-        logging.info(f"Content: {content[:100]}...")
+    def load_actions(self):
+        """Loads the whitelist of allowed actions."""
+        try:
+            if ACTIONS_FILE.exists():
+                with open(ACTIONS_FILE, 'r', encoding='utf-8') as f:
+                    self.actions = json.load(f)
+                logging.info(f"Loaded {len(self.actions)} actions from registry.")
+            else:
+                logging.warning("actions.json not found. Only internal commands available.")
+        except Exception as e:
+            logging.error(f"Failed to load actions: {e}")
+
+    def ensure_dirs(self):
+        for d in [COMPLETED_DIR, FAILED_DIR, LOGS_DIR]:
+            d.mkdir(parents=True, exist_ok=True)
+
+    def wake_up_antigravity(self, message):
+        """Injects a message into the active window (Thread-Safeish)."""
+        logging.info(f"Triggering Wake-Up: '{message}'")
         
-        # 2. Invoke Antigravity (Execution Mode)
-        if content.startswith("EXEC:"):
-            command = content.replace("EXEC:", "").strip()
-            logging.info(f"Executing command: {command}")
+        # Escape single quotes for PowerShell
+        # ' becomes '' in PowerShell string literals
+        safe_message = message.replace("'", "''")
+        
+        # PowerShell script (Same as V1 but robust)
+        ps_script = f"""
+        Add-Type -AssemblyName System.Windows.Forms
+        Start-Sleep -Milliseconds 500
+        # Push current window to bottom (Alt+Esc), revealing the chat window
+        [System.Windows.Forms.SendKeys]::SendWait('%{{ESC}}')
+        Start-Sleep -Milliseconds 500
+        [System.Windows.Forms.SendKeys]::SendWait('{safe_message}')
+        [System.Windows.Forms.SendKeys]::SendWait('{{ENTER}}')
+        """
+        try:
+            subprocess.run(["powershell", "-Command", ps_script], check=True)
+            logging.info("Wake-up signal sent.")
+        except Exception as e:
+            logging.error(f"Wake-up failed: {e}")
+
+    def run_task(self, task_name, command, result_file_path):
+        """Executes the task in a separate thread."""
+        try:
+            logging.info(f"Starting execution: {command}")
             
-            # Run the command
+            # Execute
+            start_time = time.time()
             result = subprocess.run(command, shell=True, capture_output=True, text=True, cwd=WORKSPACE_DIR)
+            duration = time.time() - start_time
             
-            # Create a receipt with output
-            result_file = INBOX_DIR / f"{task_file.stem}_RESULT.md"
-            with open(result_file, 'w', encoding='utf-8') as rf:
-                rf.write(f"# Task Result: {task_file.name}\n\n")
-                rf.write(f"Executed at: {time.ctime()}\n\n")
-                rf.write("## Console Output:\n")
-                rf.write(f"```text\n{result.stdout}\n```\n")
+            # Log Result
+            with open(result_file_path, 'w', encoding='utf-8') as rf:
+                rf.write(f"# Result: {task_name}\n\n")
+                rf.write(f"**Command:** `{command}`\n")
+                rf.write(f"**Duration:** {duration:.2f}s\n")
+                rf.write(f"**Exit Code:** {result.returncode}\n\n")
+                rf.write("## Output\n```text\n")
+                rf.write(result.stdout)
+                rf.write("\n```\n")
                 if result.stderr:
-                    rf.write("## Errors:\n")
-                    rf.write(f"```text\n{result.stderr}\n```\n")
-            
-            logging.info(f"Execution finished. Exit code: {result.returncode}")
-            
-            # WAKE UP THE AGENT
-            wake_up_antigravity(f"Monitor: Task {task_file.name} complete. Exit code {result.returncode}.")
-        else:
-            # Receipt Mode (Fallback)
-            result_file = INBOX_DIR / f"{task_file.stem}_RESULT.md"
-            with open(result_file, 'w', encoding='utf-8') as rf:
-                rf.write(f"# Task Received: {task_file.name}\n\n")
-                rf.write(f"Antigravity is in receipt mode for this file at {time.ctime()}\n\n")
-                rf.write("## Status: QUEUED\n")
-                rf.write("To execute this immediately, start the file with `EXEC:`")
+                    rf.write("## Errors\n```text\n")
+                    rf.write(result.stderr)
+                    rf.write("\n```\n")
 
-        # 3. Archive
-        shutil.move(str(task_file), str(COMPLETED_DIR / task_file.name))
-        logging.info(f"Task archived to completed.")
-
-    except Exception as e:
-        logging.error(f"Failed to process {task_file.name}: {e}")
-        shutil.move(str(task_file), str(FAILED_DIR / task_file.name))
-
-def main():
-    logging.info("Antigravity Inbox Monitor Started.")
-    logging.info(f"Watching: {INBOX_DIR}")
-    
-    # Ensure dirs exist (just in case)
-    for d in [COMPLETED_DIR, FAILED_DIR, LOGS_DIR]:
-        d.mkdir(parents=True, exist_ok=True)
-
-    try:
-        while True:
-            # Look for .md or .txt files
-            tasks = list(INBOX_DIR.glob("*.md")) + list(INBOX_DIR.glob("*.txt"))
+            logging.info(f"Finished {task_name} (Exit: {result.returncode})")
             
-            for task in tasks:
-                if task.stem.endswith("_RESULT"):
-                    continue
-                process_task(task)
+            # Wake up IS allowed from threads
+            if result.returncode == 0:
+                self.wake_up_antigravity(f"Monitor: Task '{task_name}' finished successfully.")
+            else:
+                self.wake_up_antigravity(f"Monitor: Task '{task_name}' FAILED (Code {result.returncode}). Check logs.")
+
+        except Exception as e:
+            logging.error(f"Thread execution failed: {e}")
+
+    def process_file(self, task_file):
+        try:
+            with open(task_file, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+
+            command_to_run = None
+            task_name = task_file.stem
+
+            # Parse RUN:
+            if content.startswith("RUN:"):
+                action_key = content.replace("RUN:", "").strip()
+                if action_key in self.actions:
+                    command_to_run = self.actions[action_key]
+                else:
+                    logging.warning(f"Action '{action_key}' not in whitelist.")
+                    # We create a failed result immediately
+                    with open(INBOX_DIR / f"{task_name}_ERROR.md", 'w') as f:
+                        f.write(f"Error: Action '{action_key}' is not in actions.json whitelist.")
             
-            time.sleep(POLL_INTERVAL)
-    except KeyboardInterrupt:
-        logging.info("🛑 Monitor stopped by user.")
+            # Legacy EXEC support (Removed for V2 Security)
+            elif content.startswith("EXEC:"):
+                 logging.warning("EXEC: command ignored by V2 Security Protocol.")
+                 # No-op
+
+            # Archive input file immediately so we don't process it twice
+            shutil.move(str(task_file), str(COMPLETED_DIR / task_file.name))
+
+            if command_to_run:
+                # Spawn Thread
+                result_path = INBOX_DIR / f"{task_name}_RESULT.md"
+                t = threading.Thread(target=self.run_task, args=(task_name, command_to_run, result_path))
+                t.start()
+                logging.info(f"Spawning thread for: {action_key}")
+
+        except Exception as e:
+            logging.error(f"Failed to process file {task_file}: {e}")
+            try:
+                shutil.move(str(task_file), str(FAILED_DIR / task_file.name))
+            except:
+                pass
+
+    def run(self):
+        logging.info("Antigravity Monitor V2 (Async) Started.")
+        logging.info(f"Watching {INBOX_DIR}")
+        
+        try:
+            while True:
+                # Reload actions periodically (optional, but good for dev)
+                # self.load_actions() 
+                
+                tasks = list(INBOX_DIR.glob("*.md")) + list(INBOX_DIR.glob("*.txt"))
+                for task in tasks:
+                    if "_RESULT" in task.name or "_ERROR" in task.name:
+                        continue
+                    self.process_file(task)
+                
+                time.sleep(POLL_INTERVAL)
+        except KeyboardInterrupt:
+            logging.info("Stopping Monitor.")
 
 if __name__ == "__main__":
-    main()
+    app = AntigravityMonitor()
+    app.run()
