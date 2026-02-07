@@ -58,16 +58,36 @@ class AntigravityMonitor:
         # ' becomes '' in PowerShell string literals
         safe_message = message.replace("'", "''")
         
-        # PowerShell script (Same as V1 but robust)
+        # PowerShell script: Hybrid Focus Strategy
+        # 1. Check if the Active Window is the Monitor/Watchdog.
+        # 2. If YES: Push it to back (%{ESC}) to reveal the previous window (Chat).
+        # 3. If NO: Assume we are already in the right place (or background), just type.
         ps_script = f"""
-        Add-Type -AssemblyName System.Windows.Forms
-        Start-Sleep -Milliseconds 500
-        # Push current window to bottom (Alt+Esc), revealing the chat window
+Add-Type -AssemblyName System.Windows.Forms
+
+$code = @"
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")]
+    public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
+"@
+Add-Type -MemberDefinition $code -Name Win32 -Namespace Native
+
+$hwnd = [Native.Win32]::GetForegroundWindow()
+$sb = New-Object System.Text.StringBuilder 256
+[Native.Win32]::GetWindowText($hwnd, $sb, 256)
+$title = $sb.ToString()
+
+# If we (the python script) are holding focus, get out of the way!
+if ($title -match "Watchdog" -or $title -match "python" -or $title -match "Antigravity") {{
+        # Alt+Esc pushes current window to bottom
         [System.Windows.Forms.SendKeys]::SendWait('%{{ESC}}')
         Start-Sleep -Milliseconds 500
-        [System.Windows.Forms.SendKeys]::SendWait('{safe_message}')
-        [System.Windows.Forms.SendKeys]::SendWait('{{ENTER}}')
-        """
+}}
+
+[System.Windows.Forms.SendKeys]::SendWait('{safe_message}')
+[System.Windows.Forms.SendKeys]::SendWait('{{ENTER}}')
+"""
         try:
             subprocess.run(["powershell", "-Command", ps_script], check=True)
             logging.info("Wake-up signal sent.")
@@ -101,8 +121,16 @@ class AntigravityMonitor:
             logging.info(f"Finished {task_name} (Exit: {result.returncode})")
             
             # Wake up IS allowed from threads
+            # Wake up logic: Efficient but Essential
+            essential_keywords = ["INPUT REQUIRED", "ACTION NEEDED", "PLEASE SIGN", "AUTHENTICATION PENDING"]
+            action_needed = any(kw in result.stdout.upper() for kw in essential_keywords)
+
             if result.returncode == 0:
-                self.wake_up_antigravity(f"Monitor: Task '{task_name}' finished successfully.")
+                if action_needed:
+                    self.wake_up_antigravity(f"Monitor: Task '{task_name}' succeeded, but ACTION IS REQUIRED. Check logs.")
+                else:
+                    # Silent success
+                    pass 
             else:
                 self.wake_up_antigravity(f"Monitor: Task '{task_name}' FAILED (Code {result.returncode}). Check logs.")
 
@@ -117,31 +145,51 @@ class AntigravityMonitor:
             command_to_run = None
             task_name = task_file.stem
 
-            # Parse RUN:
-            if content.startswith("RUN:"):
-                action_key = content.replace("RUN:", "").strip()
-                if action_key in self.actions:
-                    command_to_run = self.actions[action_key]
-                else:
-                    logging.warning(f"Action '{action_key}' not in whitelist.")
-                    # We create a failed result immediately
-                    with open(INBOX_DIR / f"{task_name}_ERROR.md", 'w') as f:
-                        f.write(f"Error: Action '{action_key}' is not in actions.json whitelist.")
+            # Parse Lines
+            lines = content.splitlines()
+            for line in lines:
+                line = line.strip()
+                if not line: continue
+                
+                command_to_run = None
+                action_key = None
+
+                if line.startswith("RUN:"):
+                    action_key = line.replace("RUN:", "").strip()
+                    if action_key in self.actions:
+                        command_to_run = self.actions[action_key]
+                    else:
+                        logging.warning(f"Action '{action_key}' not in whitelist.")
+                        with open(INBOX_DIR / f"{task_name}_ERROR.md", 'a') as f:
+                            f.write(f"Error: Action '{action_key}' is not in actions.json whitelist.\n")
+                
+                elif line.startswith("EXEC:"):
+                     logging.warning("EXEC: command ignored by V2 Security Protocol.")
+
+                if command_to_run:
+                    # Spawn Thread for EACH command found
+                    # Use a unique suffix if multiple commands exist? 
+                    # Actually, run_task writes to {task_name}_RESULT.md. 
+                    # If multiple run, they overwrite each other race-condition style.
+                    # Fix: Append timestamp or index to result file.
+                    
+                    import uuid
+                    unique_id = str(uuid.uuid4())[:8]
+                    result_path = INBOX_DIR / f"{task_name}_{action_key}_{unique_id}_RESULT.md"
+                    
+                    t = threading.Thread(target=self.run_task, args=(f"{task_name}:{action_key}", command_to_run, result_path))
+                    t.start()
+                    logging.info(f"Spawning thread for: {action_key}")
+                    
+                    # Small delay to ensure launch order (e.g. server before client)
+                    time.sleep(1.0)
             
-            # Legacy EXEC support (Removed for V2 Security)
-            elif content.startswith("EXEC:"):
-                 logging.warning("EXEC: command ignored by V2 Security Protocol.")
-                 # No-op
-
-            # Archive input file immediately so we don't process it twice
-            shutil.move(str(task_file), str(COMPLETED_DIR / task_file.name))
-
-            if command_to_run:
-                # Spawn Thread
-                result_path = INBOX_DIR / f"{task_name}_RESULT.md"
-                t = threading.Thread(target=self.run_task, args=(task_name, command_to_run, result_path))
-                t.start()
-                logging.info(f"Spawning thread for: {action_key}")
+            # Move to Completed after processing ALL lines
+            try:
+                logging.info(f"Moving {task_file} to completed.")
+                shutil.move(str(task_file), str(COMPLETED_DIR / task_file.name))
+            except Exception as move_err:
+                logging.error(f"Failed to move {task_file}: {move_err}")
 
         except Exception as e:
             logging.error(f"Failed to process file {task_file}: {e}")
