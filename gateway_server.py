@@ -1635,33 +1635,45 @@ async def forward_to_openrouter(payload: dict, route_config: dict, endpoint_path
     # requires StreamingResponse or proxying.
     # OpenRouter handles stream via the same endpoint.
     
-    async with httpx.AsyncClient() as client:
-        try:
-            # We defer returning the Response object back so the caller can inject headers
-            # into the initial HTTP headers (even for streams).
-            
-            # Since fastAPI proxy streaming can be complex, we'll return a raw httpx stream
-            # if stream=True, but for simplicity here we just use the fastAPI Response
-            
-            req = client.build_request("POST", backend_url, json=backend_payload, headers=headers)
-            res = await client.send(req, stream=payload.get("stream", False))
-            
-            from fastapi.responses import StreamingResponse
-            if payload.get("stream", False):
-                return StreamingResponse(
-                    res.aiter_raw(),
-                    status_code=res.status_code,
-                    media_type=res.headers.get("content-type")
-                )
-            else:
-                await res.aread()
-                return Response(
-                    content=res.content,
-                    status_code=res.status_code,
-                    media_type=res.headers.get("content-type")
-                )
-        except Exception as e:
-            return JSONResponse(status_code=502, content={"error": f"Upstream Error: {e}"})
+    # Use a long timeout for chat completion streaming
+    timeout = httpx.Timeout(600.0, connect=30.0)
+    client = httpx.AsyncClient(timeout=timeout)
+    
+    try:
+        req = client.build_request("POST", backend_url, json=backend_payload, headers=headers)
+        res = await client.send(req, stream=payload.get("stream", False))
+        
+        from fastapi.responses import StreamingResponse
+        if payload.get("stream", False):
+            # We must yield chunks manually so we can safely close the client
+            # after FastAPI's StreamingResponse finishes iterating over it.
+            async def stream_generator():
+                try:
+                    async for chunk in res.aiter_raw():
+                        yield chunk
+                finally:
+                    await res.aclose()
+                    await client.aclose()
+
+            return StreamingResponse(
+                stream_generator(),
+                status_code=res.status_code,
+                media_type=res.headers.get("content-type")
+            )
+        else:
+            await res.aread()
+            content = res.content
+            status_code = res.status_code
+            media_type = res.headers.get("content-type")
+            await client.aclose()
+            return Response(
+                content=content,
+                status_code=status_code,
+                media_type=media_type
+            )
+    except Exception as e:
+        await client.aclose()
+        return JSONResponse(status_code=502, content={"error": f"Upstream Error: {e}"})
 
 
 # --- ENDPOINTS ---
