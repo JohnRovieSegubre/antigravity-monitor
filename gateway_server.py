@@ -1666,7 +1666,9 @@ async def forward_to_openrouter(payload: dict, route_config: dict, endpoint_path
 
 # --- ENDPOINTS ---
 @app.post("/v1/chat/completions", dependencies=[Depends(rl_standard)])
+@app.post("/chat/completions", dependencies=[Depends(rl_standard)])
 @app.post("/v1/completions", dependencies=[Depends(rl_standard)])
+@app.post("/completions", dependencies=[Depends(rl_standard)])
 async def chat_completions(request: Request):
     endpoint_path = request.url.path
     try:
