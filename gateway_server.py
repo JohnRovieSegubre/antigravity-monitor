@@ -284,7 +284,7 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO:
 
         try:
 
-            from cdp.x402.x402 import create_facilitator_config
+            raise ImportError("Force testnet") # from cdp.x402.x402 import create_facilitator_config
 
             cdp_config = create_facilitator_config(
 
@@ -1667,7 +1667,6 @@ async def forward_to_openrouter(payload: dict, route_config: dict, endpoint_path
 # --- ENDPOINTS ---
 @app.post("/v1/chat/completions", dependencies=[Depends(rl_standard)])
 @app.post("/v1/completions", dependencies=[Depends(rl_standard)])
-@app.post("/v1/responses", dependencies=[Depends(rl_standard)])
 async def chat_completions(request: Request):
     endpoint_path = request.url.path
     try:
@@ -1875,9 +1874,17 @@ async def list_models():
 @app.get("/v1/models/{model_id:path}")
 async def get_model(model_id: str):
     """Specific model lookup (supports namespaced IDs)."""
-    if model_id not in MODEL_ROUTER:
+    candidate = model_id
+    if "/" not in candidate:
+        candidate = f"sovereign/{candidate}"
+    elif candidate.startswith("openai/"):
+        candidate = "sovereign/" + candidate.split("/", 1)[1]
+    elif candidate.startswith("anthropic/"):
+        candidate = "sovereign/" + candidate.split("/", 1)[1]
+        
+    if candidate not in MODEL_ROUTER:
         raise HTTPException(status_code=404, detail="Model not found")
-    return {"id": model_id, "price": MODEL_ROUTER[model_id]["price_sats"]}
+    return {"id": model_id, "price": MODEL_ROUTER[candidate]["price_sats"]}
 
 
 
