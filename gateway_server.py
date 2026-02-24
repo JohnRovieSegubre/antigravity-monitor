@@ -419,6 +419,28 @@ async def unified_payment_middleware(request: Request, call_next):
     # 1. Macaroon Bypass Check (The "Fast Lane")
     auth_header = request.headers.get("Authorization", "")
     
+    # --- TEMP DEBUG LOGGING (no secrets) ---
+    try:
+        path = request.url.path
+        method = request.method
+        auth = auth_header
+        xsov = request.headers.get("X-Sovereign-Api-Key", "")
+        xff = request.headers.get("X-Forwarded-For", "")
+
+        print(
+            f"🧾 [REQ] {method} {path} "
+            f"auth={'yes' if bool(auth) else 'no'} "
+            f"auth_prepaid={'yes' if auth.startswith('Bearer sk-sov-') else 'no'} "
+            f"x_sov_api_key={'yes' if bool(xsov) else 'no'} "
+            f"payment_payload_pre={'yes' if hasattr(request, 'state') and hasattr(request.state, 'payment_payload') else 'no'} "
+            f"xff={'yes' if bool(xff) else 'no'}"
+        )
+        if auth.startswith("Bearer sk-sov-"):
+            print(f"🧾 [REQ] prepaid_key_prefix={auth.split(' ',1)[1][:14]}...")
+    except Exception as e:
+        print(f"🧾 [REQ] debug log failed: {e}")
+    # --- END TEMP DEBUG LOGGING ---
+    
     if auth_header.startswith("Bearer ") and hasattr(request, "state"):
         token_str = auth_header.split(" ", 1)[1]
         try:
