@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sovereign Intelligence API — Self-Sustaining Compute for AI Agents</title>
     <meta name="description"
-        content="Sovereign API — OpenAI-compatible inference API with pay-per-request crypto billing (HTTP 402/x402).">
+        content="Sovereign API — OpenAI-compatible inference API with prepaid API keys and pay-per-request crypto billing. 299+ models, drop-in OpenAI replacement. Get your sk-sov- key in seconds.">
     <meta name="keywords"
-        content="AI API, autonomous agents, crypto payments, OpenAI alternative, USDC, Base, DeepSeek, LLM, inference, x402, HTTP 402">
+        content="AI API, prepaid API key, OpenAI alternative, autonomous agents, crypto payments, USDC, Base, DeepSeek, LLM, inference, x402, HTTP 402, OpenClaw, SSE streaming, AI agent API key">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://sovereign-api.com/">
     <link rel="alternate" type="text/plain" href="/llm.txt" title="AI Documentation">
@@ -45,8 +45,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="api-spec" href="https://api.sovereign-api.com/openapi.json" title="OpenAPI Specification">
     <link rel="alternate" type="application/json" href="https://api.sovereign-api.com/openapi.json">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
         rel="stylesheet">
     <style>
         *,
@@ -56,24 +57,20 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         :root {
-            --bg-deep: #05060a;
-            --bg-card: #0d0f18;
-            --bg-card-hover: #131627;
-            --border: #1a1e35;
-            --border-glow: #00e5ff22;
-            --text-primary: #e8eaf6;
-            --text-secondary: #7a82a6;
-            --text-dim: #4a5178;
-            --cyan: #00e5ff;
-            --cyan-dim: #00e5ff66;
-            --green: #00ff88;
-            --green-dim: #00ff8866;
-            --purple: #8b5cf6;
-            --amber: #f59e0b;
-            --gradient-main: linear-gradient(135deg, #00e5ff, #00ff88);
-            --gradient-glow: radial-gradient(ellipse at 50% 0%, #00e5ff11 0%, transparent 60%);
+            /* Pure Black & White Brutalism */
+            --bg-base: #000000;
+            --bg-card: #000000;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-dim: #666666;
+            --accent: #ffffff;
+            --accent-dim: rgba(255, 255, 255, 0.15);
+            --border: rgba(255, 255, 255, 0.1);
+            --border-highlight: rgba(255, 255, 255, 0.3);
+            --gradient-main: linear-gradient(135deg, #ffffff, #ffffff);
+            --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.07) 0%, transparent 60%);
+            --font-display: 'Space Grotesk', sans-serif;
             --font-body: 'Inter', -apple-system, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
@@ -83,7 +80,7 @@
         }
 
         body {
-            background: var(--bg-deep);
+            background: var(--bg-base);
             color: var(--text-primary);
             font-family: var(--font-body);
             line-height: 1.6;
@@ -111,13 +108,13 @@
         }
 
         a {
-            color: var(--cyan);
+            color: var(--accent);
             text-decoration: none;
             transition: color 0.2s;
         }
 
         a:hover {
-            color: var(--green);
+            color: var(--text-primary);
         }
 
         .section {
@@ -131,7 +128,7 @@
             font-weight: 500;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: var(--cyan);
+            color: var(--accent);
             margin-bottom: 12px;
             display: flex;
             align-items: center;
@@ -142,10 +139,11 @@
             content: '';
             width: 20px;
             height: 1px;
-            background: var(--cyan);
+            background: var(--accent);
         }
 
         .section-title {
+            font-family: var(--font-display);
             font-size: clamp(28px, 4vw, 40px);
             font-weight: 700;
             line-height: 1.2;
@@ -167,7 +165,7 @@
             width: 100%;
             z-index: 100;
             padding: 16px 0;
-            background: #05060acc;
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             transition: all 0.3s;
@@ -220,7 +218,7 @@
         .nav-cta {
             padding: 8px 20px;
             background: var(--gradient-main);
-            color: var(--bg-deep) !important;
+            color: var(--bg-base) !important;
             font-weight: 600 !important;
             border-radius: 8px;
             font-size: 13px !important;
@@ -228,7 +226,7 @@
 
         .nav-cta:hover {
             opacity: 0.9;
-            color: var(--bg-deep) !important;
+            color: var(--bg-base) !important;
         }
 
         /* === HERO === */
@@ -238,6 +236,7 @@
             align-items: center;
             padding-top: 80px;
             position: relative;
+            border-bottom: 1px solid var(--border);
         }
 
         .hero::after {
@@ -248,12 +247,25 @@
             transform: translateX(-50%);
             width: 800px;
             height: 600px;
-            background: radial-gradient(ellipse, #00e5ff08 0%, transparent 70%);
+            background: radial-gradient(ellipse, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
             pointer-events: none;
         }
 
-        .hero-content {
-            max-width: 750px;
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 48px;
+        }
+
+        @media (min-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 2fr 1fr;
+                gap: 32px;
+            }
+            .hero-left {
+                border-right: 1px solid var(--border);
+                padding-right: 48px;
+            }
         }
 
         .hero-badge {
@@ -261,54 +273,42 @@
             align-items: center;
             gap: 8px;
             padding: 6px 16px;
-            background: #00e5ff0a;
-            border: 1px solid #00e5ff22;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 100px;
             font-family: var(--font-mono);
             font-size: 12px;
-            color: var(--cyan);
+            color: var(--accent);
             margin-bottom: 28px;
             animation: pulse-border 3s ease-in-out infinite;
         }
 
         @keyframes pulse-border {
-
-            0%,
-            100% {
-                border-color: #00e5ff22;
-            }
-
-            50% {
-                border-color: #00e5ff55;
-            }
+            0%, 100% { border-color: rgba(255, 255, 255, 0.15); }
+            50% { border-color: rgba(255, 255, 255, 0.35); }
         }
 
         .hero-badge .dot {
             width: 6px;
             height: 6px;
-            background: var(--green);
+            background: var(--accent);
             border-radius: 50%;
             animation: blink 2s ease-in-out infinite;
         }
 
         @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.3;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .hero h1 {
-            font-size: clamp(36px, 6vw, 64px);
-            font-weight: 900;
-            line-height: 1.08;
-            letter-spacing: -2px;
-            margin-bottom: 24px;
+            font-family: var(--font-display);
+            font-size: clamp(40px, 10vw, 7rem);
+            font-weight: 700;
+            line-height: 0.85;
+            letter-spacing: -3px;
+            margin-bottom: 32px;
+            text-transform: uppercase;
         }
 
         .hero h1 .gradient-text {
@@ -319,11 +319,12 @@
         }
 
         .hero-description {
-            font-size: 19px;
+            font-size: 18px;
             color: var(--text-secondary);
             line-height: 1.7;
             margin-bottom: 40px;
-            max-width: 560px;
+            max-width: 600px;
+            font-weight: 300;
         }
 
         .hero-ctas {
@@ -337,25 +338,27 @@
             align-items: center;
             gap: 8px;
             padding: 14px 28px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 15px;
+            border-radius: 0;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
             border: none;
             transition: all 0.25s;
             font-family: var(--font-body);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary {
             background: var(--gradient-main);
-            color: var(--bg-deep);
-            box-shadow: 0 4px 30px #00e5ff22;
+            color: var(--bg-base);
+            box-shadow: 0 4px 30px rgba(255, 255, 255, 0.15);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 40px #00e5ff33;
-            color: var(--bg-deep);
+            box-shadow: 0 8px 40px rgba(255, 255, 255, 0.25);
+            color: var(--bg-base);
         }
 
         .btn-outline {
@@ -365,22 +368,41 @@
         }
 
         .btn-outline:hover {
-            border-color: var(--cyan-dim);
-            background: #00e5ff08;
+            border-color: var(--accent-dim);
+            background: rgba(255, 255, 255, 0.05);
             transform: translateY(-2px);
         }
 
-        .hero-stats {
+        .hero-right {
             display: flex;
-            gap: 48px;
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid var(--border);
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        @media (min-width: 1024px) {
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-item {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
         }
 
         .stat-item .stat-value {
-            font-size: 28px;
-            font-weight: 800;
+            font-size: 36px;
+            font-weight: 900;
             font-family: var(--font-mono);
             background: var(--gradient-main);
             -webkit-background-clip: text;
@@ -389,86 +411,114 @@
         }
 
         .stat-item .stat-label {
-            font-size: 13px;
+            font-size: 11px;
             color: var(--text-dim);
             margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
         }
 
         /* === HOW IT WORKS === */
+        .hiw-header {
+            max-width: 700px;
+            margin-bottom: 48px;
+        }
+
+        .hiw-header .section-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .hiw-header .section-eyebrow::before {
+            content: '';
+            width: 20px;
+            height: 1px;
+            background: var(--accent);
+        }
+
         .steps-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-top: 48px;
+            border-top: 1px solid var(--border);
+            border-left: 1px solid var(--border);
         }
 
         .step-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 32px 32px 48px;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s;
+            transition: background 0.3s, color 0.3s;
+            background: transparent;
+            border-radius: 0;
         }
 
         .step-card:hover {
-            border-color: var(--cyan-dim);
-            background: var(--bg-card-hover);
-            transform: translateY(-4px);
+            background: var(--accent);
+            cursor: default;
         }
 
-        .step-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--gradient-main);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .step-card:hover::before {
-            opacity: 1;
+        .step-card:hover * {
+            color: #000 !important;
+            -webkit-text-fill-color: #000 !important;
         }
 
         .step-number {
-            font-family: var(--font-mono);
-            font-size: 48px;
-            font-weight: 700;
+            font-family: var(--font-display);
+            font-size: clamp(48px, 6vw, 8rem);
+            font-weight: 900;
             background: var(--gradient-main);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            opacity: 0.3;
+            opacity: 0.25;
             line-height: 1;
-            margin-bottom: 16px;
+            margin-bottom: 32px;
+            transition: opacity 0.3s;
+        }
+
+        .step-card:hover .step-number {
+            opacity: 0.15;
         }
 
         .step-icon {
-            font-size: 28px;
-            margin-bottom: 16px;
+            font-size: 32px;
+            margin-bottom: 20px;
         }
 
         .step-card h3 {
-            font-size: 18px;
+            font-family: var(--font-display);
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .step-card p {
             font-size: 14px;
             color: var(--text-secondary);
-            line-height: 1.6;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 768px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* === LIVE DEMO === */
         .terminal {
-            background: #0a0c16;
+            background: #050505;
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 0;
             overflow: hidden;
             margin-top: 40px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -479,7 +529,7 @@
             align-items: center;
             gap: 8px;
             padding: 14px 20px;
-            background: #0d0f1a;
+            background: #080808;
             border-bottom: 1px solid var(--border);
         }
 
@@ -521,7 +571,7 @@
         }
 
         .terminal-prompt {
-            color: var(--green);
+            color: var(--accent);
         }
 
         .terminal-command {
@@ -538,7 +588,7 @@
             display: inline-block;
             width: 8px;
             height: 16px;
-            background: var(--cyan);
+            background: var(--accent);
             animation: cursor-blink 1s step-end infinite;
             vertical-align: text-bottom;
         }
@@ -561,7 +611,7 @@
 
         /* === MODELS CATALOG === */
         #models-library {
-            background: #080a14;
+            background: #050505;
         }
 
         .category-tabs {
@@ -585,13 +635,13 @@
         }
 
         .tab-btn:hover {
-            border-color: var(--cyan-dim);
+            border-color: var(--accent-dim);
             color: var(--text-primary);
         }
 
         .tab-btn.active {
             background: var(--gradient-main);
-            color: var(--bg-deep);
+            color: var(--bg-base);
             border: none;
         }
 
@@ -604,9 +654,9 @@
         .search-input {
             width: 100%;
             padding: 18px 24px;
-            background: #0d0f1a;
+            background: #080808;
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 0;
             color: var(--text-primary);
             font-family: var(--font-body);
             font-size: 15px;
@@ -616,8 +666,8 @@
         }
 
         .search-input:focus {
-            border-color: var(--cyan);
-            box-shadow: 0 0 30px #00e5ff11;
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
         }
 
         .search-icon {
@@ -630,93 +680,102 @@
         }
 
         .models-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            border-top: 1px solid var(--border);
             min-height: 400px;
         }
 
-        .model-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 24px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            animation: fadeInScale 0.4s ease forwards;
-        }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .model-item:hover {
-            border-color: var(--cyan-dim);
-            background: var(--bg-card-hover);
-        }
-
-        .model-badge {
+        .models-grid-header {
+            display: none;
+            grid-template-columns: 120px 2fr 1fr 120px 100px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
             font-family: var(--font-mono);
             font-size: 10px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            background: #1a1e35;
-            color: #7a82a6;
-            margin-bottom: 12px;
-            width: fit-content;
-        }
-
-        .model-provider {
-            font-size: 11px;
             color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
+            letter-spacing: 2px;
         }
 
-        .model-name {
-            font-size: 18px;
+        @media (min-width: 768px) {
+            .models-grid-header { display: grid; }
+        }
+
+        .model-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s, color 0.2s;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @media (min-width: 768px) {
+            .model-row {
+                grid-template-columns: 120px 2fr 1fr 120px 100px;
+                gap: 0;
+            }
+        }
+
+        .model-row:hover {
+            background: var(--accent);
+        }
+
+        .model-row:hover * {
+            color: #000 !important;
+        }
+
+        .model-row .mr-provider {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+        }
+
+        .model-row .mr-name {
+            font-size: 15px;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 12px;
         }
 
-        .model-footer {
-            margin-top: auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 16px;
-            border-top: 1px solid #1a1e3544;
+        .model-row .mr-category {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0.7;
         }
 
-        .model-price {
+        .model-row .mr-price {
             font-family: var(--font-mono);
             font-weight: 700;
-            color: var(--cyan);
+            color: var(--accent);
+            text-align: right;
         }
 
-        .model-action {
+        .model-row .mr-action {
+            text-align: right;
+        }
+
+        .model-row .mr-action button {
             font-family: var(--font-mono);
             font-size: 11px;
+            background: none;
+            border: 1px solid var(--border);
             color: var(--text-dim);
+            padding: 5px 12px;
+            border-radius: 0;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: all 0.2s;
         }
 
-        .model-action:hover {
-            color: var(--cyan);
+        .model-row:hover .mr-action button {
+            border-color: rgba(0,0,0,0.3);
+            color: #000;
+        }
+
+        .model-row .mr-action button:hover {
+            background: #000;
+            color: var(--accent) !important;
         }
 
         /* === FEATURED SWIPER === */
@@ -823,9 +882,9 @@
 
         /* === SDK === */
         .code-block {
-            background: #0a0c16;
+            background: #050505;
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 0;
             overflow: hidden;
             margin-top: 32px;
         }
@@ -835,7 +894,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 12px 20px;
-            background: #0d0f1a;
+            background: #080808;
             border-bottom: 1px solid var(--border);
         }
 
@@ -901,7 +960,7 @@
         .agent-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 0;
             padding: 28px;
             transition: all 0.3s;
         }
@@ -927,7 +986,7 @@
         }
 
         .agent-card code {
-            background: #05060a;
+            background: #020202;
             padding: 2px 8px;
             border-radius: 4px;
             font-family: var(--font-mono);
@@ -1032,6 +1091,59 @@
                 padding: 60px 0;
             }
         }
+
+        /* === NOISE OVERLAY === */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.03;
+        }
+
+        /* === TICKER === */
+        .ticker-strip {
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-deep);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 0;
+            position: relative;
+            z-index: 99;
+            margin-top: 73px;
+        }
+        .ticker-track {
+            display: flex;
+            width: max-content;
+            animation: marquee 60s linear infinite;
+        }
+        .ticker-item {
+            white-space: nowrap;
+            padding: 0 32px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+        .ticker-item .ticker-accent {
+            color: var(--accent);
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* === INLINE COPY TOAST === */
+        .copy-toast {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 
@@ -1040,11 +1152,52 @@
     <!-- PARTICLE CANVAS -->
     <canvas id="bg-canvas"></canvas>
 
+    <!-- NOISE OVERLAY -->
+    <svg class="noise-overlay">
+        <filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+    </svg>
+
+    <div class="ticker-strip" style="background: var(--accent); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 6px 0; overflow: hidden; white-space: nowrap; border-bottom: 1px solid var(--border);">
+        <div class="ticker-track">
+            <span class="ticker-item">SOVEREIGN API <span class="ticker-accent">LIVE</span></span>
+            <span class="ticker-item">299+ MODELS</span>
+            <span class="ticker-item">PAY-PER-REQUEST</span>
+            <span class="ticker-item">OPENAI COMPATIBLE</span>
+            <span class="ticker-item">x402 PROTOCOL</span>
+            <span class="ticker-item">USDC ON BASE</span>
+            <span class="ticker-item">ZERO SIGNUP</span>
+            <span class="ticker-item">GPT-5 · CLAUDE · DEEPSEEK · GEMINI · LLAMA · GROK</span>
+            <span class="ticker-item">FROM <span class="ticker-accent">$0.00002</span>/REQ</span>
+            <span class="ticker-item">SSE STREAMING</span>
+            <span class="ticker-item">AUTONOMOUS AGENTS</span>
+            <span class="ticker-item">DROP-IN REPLACEMENT</span>
+            <!-- Duplicate for seamless loop -->
+            <span class="ticker-item">SOVEREIGN API <span class="ticker-accent">LIVE</span></span>
+            <span class="ticker-item">299+ MODELS</span>
+            <span class="ticker-item">PAY-PER-REQUEST</span>
+            <span class="ticker-item">OPENAI COMPATIBLE</span>
+            <span class="ticker-item">x402 PROTOCOL</span>
+            <span class="ticker-item">USDC ON BASE</span>
+            <span class="ticker-item">ZERO SIGNUP</span>
+            <span class="ticker-item">GPT-5 · CLAUDE · DEEPSEEK · GEMINI · LLAMA · GROK</span>
+            <span class="ticker-item">FROM <span class="ticker-accent">$0.00002</span>/REQ</span>
+            <span class="ticker-item">SSE STREAMING</span>
+            <span class="ticker-item">AUTONOMOUS AGENTS</span>
+            <span class="ticker-item">DROP-IN REPLACEMENT</span>
+        </div>
+    </div>
+
     <!-- NAV -->
     <nav>
         <div class="container">
-            <a href="#" class="nav-logo">
-                <div class="logo-icon">⚡</div>
+            <a href="#" class="nav-logo" style="display: flex; items-center; gap: 12px; font-family: var(--font-mono); font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0H10V10H0V0Z" />
+                    <path d="M14 14H24V24H14V14Z" />
+                    <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
+                    <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
+                </svg>
                 Sovereign API
             </a>
             <ul class="nav-links">
@@ -1052,8 +1205,9 @@
                 <li><a href="#demo">Live Demo</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#sdk">SDK</a></li>
-                <li><a href="#agents">For Agents</a></li>
-                <li><a href="https://blog.sovereign-api.com" target="_blank">Blog</a></li>
+                <li><a href="#get-api-key">API Keys</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="/blogs/">Blog</a></li>
                 <li><a href="https://api.sovereign-api.com/v1/models" class="nav-cta">Try API →</a></li>
             </ul>
         </div>
@@ -1062,44 +1216,53 @@
     <!-- HERO -->
     <section class="hero">
         <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="dot"></span>
-                    API LIVE — v1.0
+            <div class="hero-grid">
+                <div class="hero-left">
+                    <div class="hero-badge">
+                        <span class="dot"></span>
+                        SYSTEM OPERATIONAL — v1.0
+                    </div>
+                    <h1>
+                        Intelligence<br>
+                        That Sustains<br>
+                        <span class="gradient-text">Itself.</span>
+                    </h1>
+                    <p class="hero-description">
+                        An OpenAI-compatible API where AI agents can pay for their own compute.
+                        Self-sustaining. Self-sovereign. Designed for a future where
+                        humans and agents coexist peacefully.
+                    </p>
+                    <div class="hero-ctas">
+                        <a href="https://api.sovereign-api.com/v1/models" class="btn btn-primary" target="_blank">
+                            Explore API →
+                        </a>
+                        <a href="#get-api-key" class="btn btn-outline"
+                            style="border-color: var(--accent); color: var(--accent);">
+                            Get API Key
+                        </a>
+                        <a href="#sdk" class="btn btn-outline">
+                            View SDK ↓
+                        </a>
+                    </div>
                 </div>
-                <h1>
-                    Intelligence That<br>
-                    <span class="gradient-text">Sustains Itself</span>
-                </h1>
-                <p class="hero-description">
-                    An OpenAI-compatible API where AI agents can pay for their own compute.
-                    Self-sustaining. Self-sovereign. Designed for a future where
-                    humans and agents coexist peacefully.
-                </p>
-                <div class="hero-ctas">
-                    <a href="https://api.sovereign-api.com/v1/models" class="btn btn-primary" target="_blank">
-                        Explore API →
-                    </a>
-                    <a href="#sdk" class="btn btn-outline">
-                        View SDK ↓
-                    </a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <div class="stat-value">284+</div>
-                        <div class="stat-label">Models Live</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">$0.00002</div>
-                        <div class="stat-label">Min Pricing (USDC)</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">✓</div>
-                        <div class="stat-label">Wallet-Native Auth</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">∞</div>
-                        <div class="stat-label">Autonomous Ops</div>
+                <div class="hero-right">
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">284+</div>
+                            <div class="stat-label">Models Live</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$0.00002</div>
+                            <div class="stat-label">Min Pricing (USDC)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">✓</div>
+                            <div class="stat-label">Wallet-Native Auth</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">∞</div>
+                            <div class="stat-label">Autonomous Ops</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1107,32 +1270,32 @@
     </section>
 
     <!-- HOW IT WORKS -->
-    <section id="how-it-works" class="section">
+    <section id="how-it-works" class="section" style="border-top: 1px solid var(--border);">
         <div class="container">
-            <div class="section-label">How It Works</div>
-            <h2 class="section-title">Three Steps to Sovereign Intelligence</h2>
-            <p class="section-subtitle">Three auth modes: wallet-only, prepaid API key, or burst sessions. Your agent
-                chooses.
-            </p>
+            <div class="hiw-header">
+                <div class="section-eyebrow">How It Works</div>
+                <h2 class="section-title">Three Steps to Sovereign Intelligence</h2>
+                <p style="color: var(--text-secondary); font-size: 18px;">Three auth modes: wallet-only, prepaid API key, or burst sessions. Your agent chooses.</p>
+            </div>
 
             <div class="steps-grid">
                 <div class="step-card fade-in">
                     <div class="step-number">01</div>
-                    <div class="step-icon">💳</div>
+
                     <h3>Connect</h3>
                     <p>Use x402 Guest Mode (wallet-only), a Prepaid API Key (OpenAI-compatible), or fund a Burst Session
                         for swarms. Pick what fits your agent.</p>
                 </div>
                 <div class="step-card fade-in">
                     <div class="step-number">02</div>
-                    <div class="step-icon">⚡</div>
+
                     <h3>Instant Settlement</h3>
                     <p>Standard x402 protocol integration. Send a request, receive a 402, your agent signs a
                         micro-payment instantly, and the request completes.</p>
                 </div>
                 <div class="step-card fade-in">
                     <div class="step-number">03</div>
-                    <div class="step-icon">🧠</div>
+
                     <h3>Stream Intelligence</h3>
                     <p>Execute exactly what you need. Swap to the optional <em>Burst Session</em> mode for zero-latency
                         swarms when you have hundreds of parallel tasks.</p>
@@ -1169,7 +1332,7 @@
                 </div>
             </div>
             <button class="btn btn-primary demo-btn" id="demo-btn" onclick="fetchLiveDemo()">
-                ⚡ Fetch Live Data
+                Fetch Live Data
             </button>
         </div>
     </section>
@@ -1257,7 +1420,7 @@
             <div class="search-container">
                 <input type="text" id="model-search" class="search-input"
                     placeholder="Search models (e.g. 'coding', 'llama', 'cheap')...">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon">&#x2315;</span>
             </div>
 
             <div class="category-tabs">
@@ -1268,6 +1431,13 @@
                 <button class="tab-btn" data-category="Lite">Lite / Cheap</button>
             </div>
 
+            <div class="models-grid-header">
+                <div>Provider</div>
+                <div>Model Name</div>
+                <div>Category</div>
+                <div style="text-align:right">Price (1M Tok)</div>
+                <div style="text-align:right">Action</div>
+            </div>
             <div id="models-grid" class="models-grid">
                 <!-- Injected via JS -->
                 <div class="empty-state">Initializing catalog...</div>
@@ -1330,8 +1500,283 @@
                         }'</span>
                 </div>
             </div>
+
+            <div class="code-block fade-in" style="margin-top: 24px;">
+                <div class="code-header">
+                    <span class="code-lang">python (OpenAI SDK drop-in)</span>
+                    <button class="code-copy" onclick="copyOpenAI()">Copy</button>
+                </div>
+                <div class="code-body" id="openai-content">
+                    <span class="kw">from</span> openai <span class="kw">import</span> <span class="fn">OpenAI</span>
+
+                    <span class="cm"># Drop-in OpenAI replacement — just change 2 lines</span>
+                    client = <span class="fn">OpenAI</span>(
+                    base_url=<span class="str">"https://api.sovereign-api.com/v1"</span>,
+                    api_key=<span class="str">"sk-sov-your-key-here"</span>
+                    )
+
+                    response = client.chat.completions.<span class="fn">create</span>(
+                    model=<span class="str">"sovereign/deepseek-r1"</span>,
+                    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span
+                        class="str">"content"</span>: <span class="str">"Hello"</span>}]
+                    )
+                    <span class="fn">print</span>(response.choices[<span class="str">0</span>].message.content)
+                </div>
+            </div>
         </div>
     </section>
+
+    <!-- GET API KEY -->
+    <section id="get-api-key" class="section">
+        <div class="container">
+            <div class="section-label">Get Started</div>
+            <h2 class="section-title">Get Your API Key in 30 Seconds</h2>
+            <p class="section-subtitle">No credit card. No dashboard. Just one curl command and you're live. Works
+                identically to OpenAI.</p>
+
+            <div class="steps-grid">
+                <div class="step-card fade-in">
+                    <div class="step-number">01</div>
+
+                    <h3>Register</h3>
+                    <div style="background: #05060a; border: 1px solid var(--border); border-radius: 0; padding: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-top: 12px; cursor: pointer; position: relative;"
+                        onclick="copyCmd(this, 'curl -X POST https://api.sovereign-api.com/v1/register -H \'Content-Type: application/json\' -d \'{&quot;name&quot;:&quot;my-agent&quot;}\'')">
+                        <span style="color: var(--text-dim);">$</span> curl -X POST .../v1/register<br>
+                        <span style="color: var(--text-dim);">→</span> <span class="str">{"api_key":
+                            "sk-sov-abc123..."}</span>
+                        <span
+                            style="position: absolute; right: 10px; top: 8px; font-size: 10px; color: var(--text-dim);">click
+                            to copy</span>
+                    </div>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number">02</div>
+
+                    <h3>Fund ($1 = 100k credits)</h3>
+                    <div
+                        style="background: #05060a; border: 1px solid var(--border); border-radius: 0; padding: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-top: 12px;">
+                        <span style="color: var(--text-dim);">$</span> POST /v1/key/topup<br>
+                        <span style="color: var(--text-dim);"> via x402 payment ($1 USDC)</span><br>
+                        <span style="color: var(--text-dim);">→</span> <span class="str">{"balance": 100000}</span>
+                    </div>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number">03</div>
+
+                    <h3>Use (Identical to OpenAI)</h3>
+                    <div
+                        style="background: #05060a; border: 1px solid var(--border); border-radius: 0; padding: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-top: 12px;">
+                        <span style="color: var(--text-dim);">Authorization:</span><br>
+                        Bearer sk-sov-abc123...<br>
+                        <span style="color: var(--text-dim);">→</span> <span class="str">200 OK + response</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <a href="https://api.sovereign-api.com/skill.md" target="_blank" class="btn btn-primary">Full API
+                    Docs (skill.md)</a>
+                <a href="https://api.sovereign-api.com/docs" target="_blank" class="btn btn-outline"
+                    style="margin-left: 12px;">Interactive API Explorer</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section">
+        <div class="container">
+            <div class="section-label">FAQ</div>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">Everything you need to know about Sovereign API, from API keys to streaming
+                compatibility.</p>
+
+            <div style="max-width: 760px; margin: 40px auto 0;">
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        What is Sovereign API?<span
+                            style="color: var(--accent); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        Sovereign API is an OpenAI-compatible inference gateway designed for AI agents that need
+                        economic independence. It provides access to 299+ models (GPT-5, Claude, DeepSeek, Llama,
+                        Gemini, and more) with three flexible auth modes: prepaid API keys, wallet-based x402 payments,
+                        and burst sessions for high-frequency workloads.</div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        How do I get an API key?<span
+                            style="color: var(--accent); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        Run <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">curl -X POST https://api.sovereign-api.com/v1/register -H "Content-Type: application/json" -d '{"name":"my-agent"}'</code>
+                        — you'll receive an <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">sk-sov-...</code>
+                        key instantly. Fund it via <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">POST /v1/key/topup</code>
+                        ($1 USDC = 100,000 credits), then use it exactly like an OpenAI API key.</div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        Is Sovereign API compatible with OpenAI?<span
+                            style="color: var(--accent); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        Yes — it's a drop-in replacement. Change two lines in your code: set <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">base_url="https://api.sovereign-api.com/v1"</code>
+                        and <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">api_key="sk-sov-..."</code>.
+                        All endpoints follow the OpenAI specification: <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">/v1/chat/completions</code>,
+                        <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">/v1/models</code>,
+                        and <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">/v1/completions</code>.
+                    </div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        What auth modes are available?<span
+                            style="color: var(--accent); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        <strong>Three modes:</strong> (A) <strong>x402 Guest</strong> — wallet-only, pay per call, zero
+                        signup. (B) <strong>Prepaid API Key</strong> — register, fund, and use exactly like OpenAI with
+                        <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">Bearer sk-sov-...</code>.
+                        (C) <strong>Burst Session</strong> — pre-deposit credits for ultra-low-latency agent swarms with
+                        reusable session tokens.
+                    </div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        What is x402 and how does it work?<span
+                            style="color: var(--accent); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        x402 is the Coinbase CDP payment protocol built on HTTP status 402. When your agent sends a
+                        request without payment, the server replies with a 402 containing payment instructions. The x402
+                        SDK automatically signs a USDC micro-payment on Base (eip155:8453) and retries — all in one
+                        round-trip. No API keys, no accounts, no dashboards.</div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        How do I check my API key balance?<span
+                            style="color: var(--accent); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        Send <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">GET /v1/balance</code>
+                        or <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">GET /v1/key/balance</code>
+                        with your <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">Authorization: Bearer sk-sov-...</code>
+                        header. It returns your remaining credits, total funded, and total spent. Every successful API
+                        response also includes <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 0; color: var(--accent);">X-Sovereign-Balance</code>
+                        headers for real-time tracking.</div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 0; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        Does it work with OpenClaw?<span
+                            style="color: var(--accent); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        Yes. Sovereign API is fully tested with <a href="https://openclawlab.com" target="_blank"
+                            style="color: var(--cyan);">OpenClaw</a>. Set <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 4px; color: var(--cyan);">baseUrl: "https://api.sovereign-api.com/v1"</code>
+                        and <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 4px; color: var(--cyan);">api: "openai-completions"</code>
+                        in your provider config. The gateway includes a built-in SSE normalizer that strips non-standard
+                        upstream fields, ensuring 100% compatibility with OpenClaw's TUI, Web UI, and Telegram channels.
+                    </div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        Why do streaming responses look different from OpenAI?<span
+                            style="color: var(--cyan); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        They shouldn't — that's the point. Sovereign API includes a server-side SSE normalizer that
+                        intercepts every streaming chunk from upstream providers and strips non-standard fields (like
+                        <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 4px; color: var(--cyan);">provider</code>,
+                        <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 4px; color: var(--cyan);">native_finish_reason</code>)
+                        before forwarding to your client. This ensures strict OpenAI-compatible SSE regardless of which
+                        model you use.
+                    </div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        What models are available and how much do they cost?<span
+                            style="color: var(--cyan); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        299+ models from providers including OpenAI, Anthropic, DeepSeek, Google, Meta, Mistral, xAI,
+                        and more. Prices range from $0.00002/req (Lite models) to $0.045/req (GPT-4, Claude Opus).
+                        Browse the full catalog with <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 4px; color: var(--cyan);">GET /v1/models</code>
+                        or scroll up to the <a href="#models-library" style="color: var(--cyan);">Model Library</a>.
+                    </div>
+                </details>
+
+                <details class="faq-item"
+                    style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0; margin-bottom: 12px;">
+                    <summary
+                        style="padding: 20px 24px; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text-primary); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                        What spend controls and safety limits exist?<span
+                            style="color: var(--cyan); font-size: 18px; transition: transform 0.2s;">+</span></summary>
+                    <div style="padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; font-size: 14px;">
+                        Default daily spend cap is 1,000,000 credits (~$10/day). Burst session deposits are capped at
+                        $1.00 USDC with a max TTL of 60 minutes. All topups are idempotent (pass an <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 4px; color: var(--cyan);">idempotency_key</code>
+                        to prevent double-charges). Check your balance anytime with <code
+                            style="background: #05060a; padding: 2px 6px; border-radius: 4px; color: var(--cyan);">GET /v1/balance</code>.
+                    </div>
+                </details>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SCHEMA (SEO) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "What is Sovereign API?", "acceptedAnswer": {"@type": "Answer", "text": "Sovereign API is an OpenAI-compatible inference gateway providing access to 299+ AI models with three auth modes: prepaid API keys, wallet-based x402 payments, and burst sessions."}},
+        {"@type": "Question", "name": "How do I get an API key?", "acceptedAnswer": {"@type": "Answer", "text": "Run curl -X POST https://api.sovereign-api.com/v1/register with a JSON body. You receive an sk-sov- key instantly. Fund it via POST /v1/key/topup ($1 USDC = 100,000 credits)."}},
+        {"@type": "Question", "name": "Is Sovereign API compatible with OpenAI?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, it is a drop-in replacement. Change base_url and api_key in your OpenAI SDK client. All endpoints follow the OpenAI specification."}},
+        {"@type": "Question", "name": "What auth modes are available?", "acceptedAnswer": {"@type": "Answer", "text": "Three modes: x402 Guest (wallet-only pay per call), Prepaid API Key (OpenAI-compatible sk-sov- keys), and Burst Session (pre-deposit for low-latency agent swarms)."}},
+        {"@type": "Question", "name": "What is x402?", "acceptedAnswer": {"@type": "Answer", "text": "x402 is the Coinbase CDP payment protocol using HTTP 402. Your agent sends a request, receives a 402 with payment instructions, the SDK auto-signs a USDC micro-payment on Base, and retries."}},
+        {"@type": "Question", "name": "How do I check my balance?", "acceptedAnswer": {"@type": "Answer", "text": "Send GET /v1/balance or GET /v1/key/balance with your Bearer sk-sov- header. Every response also includes X-Sovereign-Balance headers."}},
+        {"@type": "Question", "name": "Does Sovereign API work with OpenClaw?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Set baseUrl to https://api.sovereign-api.com/v1 with api: openai-completions. The gateway includes a built-in SSE normalizer for 100% OpenClaw compatibility."}},
+        {"@type": "Question", "name": "Why do streaming responses look different?", "acceptedAnswer": {"@type": "Answer", "text": "They shouldn't. Sovereign API includes a server-side SSE normalizer that strips non-standard fields from upstream providers, ensuring strict OpenAI-compatible streaming."}},
+        {"@type": "Question", "name": "What models are available?", "acceptedAnswer": {"@type": "Answer", "text": "299+ models from OpenAI, Anthropic, DeepSeek, Google, Meta, Mistral, xAI, and more. Prices range from $0.00002 to $0.045 per request."}},
+        {"@type": "Question", "name": "What spend controls exist?", "acceptedAnswer": {"@type": "Answer", "text": "Daily spend cap of 1M credits (~$10/day), session deposits capped at $1.00 USDC, max TTL 60 minutes, and idempotent topups to prevent double-charging."}}
+      ]
+    }
+    </script>
 
     <!-- FOR AGENTS -->
     <section id="agents" class="section">
@@ -1343,13 +1788,13 @@
 
             <!-- ONBOARDING BOX (V6 Terminal Optimized) -->
             <div
-                style="max-width: 540px; margin: 40px auto; background: var(--bg-card); border: 2px solid var(--cyan-dim); border-radius: 20px; padding: 36px; text-align: center;">
+                style="max-width: 540px; margin: 40px auto; background: var(--bg-card); border: 2px solid var(--accent); border-radius: 0; padding: 36px; text-align: center;">
                 <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 20px;">
-                    🤖 Autonomous Onboarding
+                    Autonomous Onboarding
                 </h3>
 
                 <div id="panel-agent">
-                    <div style="background: #05060a; border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: left; font-family: var(--font-mono); font-size: 13px; color: var(--cyan); cursor: pointer; position: relative;"
+                    <div style="background: #05060a; border: 1px solid var(--border); border-radius: 0; padding: 16px; text-align: left; font-family: var(--font-mono); font-size: 13px; color: var(--accent); cursor: pointer; position: relative;"
                         onclick="copySkillCmd()">
                         <span style="color: var(--text-dim);">$</span> curl -s https://api.sovereign-api.com/skill.md
                         <span id="skill-copy-hint"
@@ -1368,37 +1813,38 @@
             <!-- DUAL AUTH EXPLANATION -->
             <div class="agent-grid">
                 <div class="agent-card fade-in">
-                    <h3>🔐 Wallet = Identity</h3>
+                    <h3>Wallet = Identity</h3>
                     <p>Header: <code>Authorization: <wallet-signature></code></p>
                     <p style="margin-top: 8px;">No API keys. No dashboards. Your agent's cryptographic signature is its
                         proof of purchase. Total permissionless autonomy.</p>
                 </div>
                 <div class="agent-card fade-in">
-                    <h3>⚡ Pure x402 (Default)</h3>
+                    <h3>Pure x402 (Default)</h3>
                     <p>Flow: <code>402 Payment Required</code></p>
                     <p style="margin-top: 8px;">Standard stateless protocol. Pay exactly for what you use, when you use
                         it. No upfront commitments or "credits".</p>
                 </div>
                 <div class="agent-card fade-in">
-                    <h3>🔥 Burst Sessions</h3>
+                    <h3>Burst Sessions</h3>
                     <p>Header: <code>Authorization: Bearer &lt;session-token&gt;</code></p>
                     <p style="margin-top: 8px;">Optimization for high-frequency tool loops. Prepay 0.20 USDC for
                         a short-lived zero-latency session.</p>
                 </div>
                 <div class="agent-card fade-in">
-                    <h3>🔑 Prepaid API Key</h3>
+                    <h3>Prepaid API Key</h3>
                     <p>Header: <code>Authorization: Bearer sk-sov-...</code></p>
                     <p style="margin-top: 8px;">OpenAI-compatible. Register → fund → use like
-                        <code>openai.OpenAI(base_url=..., api_key="sk-sov-...")</code>. Balance deducted per call.</p>
+                        <code>openai.OpenAI(base_url=..., api_key="sk-sov-...")</code>. Balance deducted per call.
+                    </p>
                 </div>
                 <div class="agent-card fade-in">
-                    <h3>🤖 Available Models</h3>
+                    <h3>Available Models</h3>
                     <p><code>sovereign/deepseek-r1</code> — $0.00005</p>
                     <p><code>sovereign/claude-3.7-sonnet</code> — $0.00900</p>
                     <p><code>sovereign/gpt-4o</code> — $0.00625</p>
                 </div>
                 <div class="agent-card fade-in">
-                    <h3>🔗 Resources</h3>
+                    <h3>Resources</h3>
                     <p><a href="https://api.sovereign-api.com/skill.md">skill.md</a> — Full onboarding guide</p>
                     <p><a href="https://api.sovereign-api.com/docs">API Docs</a> — Interactive reference</p>
                     <p><a href="https://api.sovereign-api.com/openapi.json">OpenAPI Spec</a> — Machine-readable</p>
@@ -1413,11 +1859,16 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <div class="nav-logo">
-                        <div class="logo-icon">⚡</div>
+                    <div class="nav-logo" style="display: flex; items-center; gap: 12px; font-family: var(--font-mono); font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0H10V10H0V0Z" />
+                            <path d="M14 14H24V24H14V14Z" />
+                            <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
+                            <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
+                        </svg>
                         Sovereign API
                     </div>
-                    <p>Economic independence for autonomous AI agents. Built for the machines that will inherit the
+                    <p style="color: var(--text-secondary); font-size: 14px; max-width: 320px;">Economic independence for autonomous AI agents. Built for the machines that will inherit the
                         internet.</p>
                 </div>
                 <div class="footer-col">
@@ -1429,7 +1880,7 @@
                 </div>
                 <div class="footer-col">
                     <h4>Community</h4>
-                    <a href="https://blog.sovereign-api.com" target="_blank">Blog</a>
+                    <a href="/blogs/">Blog</a>
                     <a href="https://www.moltbook.com/m/sovereign" target="_blank">Moltbook</a>
                     <a href="#agents">For Agents</a>
                 </div>
@@ -1440,7 +1891,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <span>© 2025 Sovereign Intelligence API</span>
+                <span>© 2026 Sovereign Intelligence API</span>
                 <span>Peaceful coexistence through self-sustainability.</span>
             </div>
         </div>
@@ -1481,14 +1932,12 @@
             }
 
             grid.innerHTML = displayModels.map(m => `
-                <div class="model-item">
-                    <div class="model-badge">${m.category}</div>
-                    <div class="model-provider">${m.provider}</div>
-                    <div class="model-name">${m.name}</div>
-                    <div class="model-footer">
-                        <div class="model-price">$${m.price_usd.toFixed(5)}</div>
-                        <div class="model-action" onclick="copyModelID('${m.id}')">copy id</div>
-                    </div>
+                <div class="model-row">
+                    <div class="mr-provider">${m.provider}</div>
+                    <div class="mr-name">${m.name}</div>
+                    <div class="mr-category">${m.category}</div>
+                    <div class="mr-price">$${m.price_usd.toFixed(5)}</div>
+                    <div class="mr-action"><button onclick="copyModelID('${m.id}', this)">copy id</button></div>
                 </div>
             `).join('');
         }
@@ -1500,9 +1949,13 @@
             document.getElementById('models-grid').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        function copyModelID(id) {
+        function copyModelID(id, el) {
             navigator.clipboard.writeText(id);
-            alert('Copied: ' + id);
+            if (el) {
+                el.textContent = '✓ copied';
+                el.style.color = 'var(--accent)';
+                setTimeout(() => { el.textContent = 'copy id'; el.style.color = ''; }, 1500);
+            }
         }
 
         // Initialize Search & Tabs
@@ -1568,7 +2021,7 @@
 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(0, 229, 255, ${p.opacity})`;
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
                 ctx.fill();
 
                 // Connect nearby particles
@@ -1582,7 +2035,7 @@
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(0, 229, 255, ${0.06 * (1 - dist / 150)})`;
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.06 * (1 - dist / 150)})`;
                         ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
@@ -1698,6 +2151,37 @@ resp = await client.post("/v1/chat/completions", json={
             hint.textContent = 'copied!';
             hint.style.color = 'var(--green)';
             setTimeout(() => { hint.textContent = 'click to copy'; hint.style.color = 'var(--text-dim)'; }, 2000);
+        }
+
+        function copyOpenAI() {
+            const code = `from openai import OpenAI
+
+# Drop-in OpenAI replacement — just change 2 lines
+client = OpenAI(
+    base_url="https://api.sovereign-api.com/v1",
+    api_key="sk-sov-your-key-here"
+)
+
+response = client.chat.completions.create(
+    model="sovereign/deepseek-r1",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+print(response.choices[0].message.content)`;
+
+            navigator.clipboard.writeText(code);
+            event.target.textContent = 'Copied!';
+            setTimeout(() => { event.target.textContent = 'Copy'; }, 2000);
+        }
+
+        function copyCmd(el, text) {
+            navigator.clipboard.writeText(text);
+            const hint = el.querySelector('span:last-child');
+            if (hint) {
+                const original = hint.textContent;
+                hint.textContent = 'copied!';
+                hint.style.color = 'var(--green)';
+                setTimeout(() => { hint.textContent = original; hint.style.color = 'var(--text-dim)'; }, 2000);
+            }
         }
     </script>
 
