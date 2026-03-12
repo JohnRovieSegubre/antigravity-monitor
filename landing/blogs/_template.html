@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} — Sovereign Intelligence Blog</title>
+    <meta name="description" content="{{ description }}">
+    <meta name="keywords" content="{{ keywords }}">
+    <meta name="author" content="{{ author }}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    <!-- OpenGraph -->
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ description }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ og_url }}">
+    <meta property="og:site_name" content="Sovereign API Blog">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ title }}">
+    <meta name="twitter:description" content="{{ description }}">
+
+    <!-- Schema Markup (auto-injected by build_blog.py) -->
+    {{ schema_markup }}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #000000;
+            --bg-card: #000000;
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #ffffff;
+            --gradient-main: linear-gradient(135deg, #ffffff, #ffffff);
+            --font-body: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--text-primary);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 16px 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-primary);
+        }
+
+        .nav-logo .logo-icon {
+            display: none;
+        }
+
+        .article-header {
+            padding: 140px 0 60px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .article-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .article-meta {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .article-content {
+            padding: 60px 0;
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        /* Markdown Styling */
+        .article-content h1,
+        .article-content h2,
+        .article-content h3 {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        .article-content h2 {
+            font-size: 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .article-content h3 {
+            font-size: 22px;
+        }
+
+        .article-content p {
+            margin-bottom: 24px;
+        }
+
+        .article-content ul,
+        .article-content ol {
+            margin-bottom: 24px;
+            padding-left: 24px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .article-content pre {
+            background: #0a0c16;
+            padding: 20px;
+            border-radius: 0;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .article-content code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 0;
+        }
+
+        .article-content pre code {
+            background: transparent;
+            padding: 0;
+            color: #a9b7c6;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        .article-content img {
+            max-width: 100%;
+            border-radius: 0;
+            margin: 32px 0;
+            border: 1px solid var(--border);
+        }
+
+        .article-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .article-content th,
+        .article-content td {
+            padding: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .article-content th {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="nav-logo" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.1em;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0H10V10H0V0Z" />
+                    <path d="M14 14H24V24H14V14Z" />
+                    <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
+                    <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
+                </svg>
+                Sovereign API
+            </a>
+            <a href="/blogs/" style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Blog</a>
+        </div>
+    </nav>
+
+    <article class="article-header">
+        <div class="container">
+            <h1 class="article-title">{{ title }}</h1>
+            <div class="article-meta">
+                <span>{{ date }}</span>
+                <span>{{ author }}</span>
+            </div>
+        </div>
+    </article>
+
+    <main class="container article-content">
+        {{ content }}
+    </main>
+
+    <footer
+        style="text-align: center; padding: 60px 0; border-top: 1px solid var(--border); margin-top: 60px; color: var(--text-secondary); font-size: 14px;">
+        <div class="container">
+            © 2026 Sovereign API. All autonomous rights reserved.
+        </div>
+    </footer>
+</body>
+
+</html>

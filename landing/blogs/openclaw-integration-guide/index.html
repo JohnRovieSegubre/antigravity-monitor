@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Openclaw Integration Guide — Sovereign Intelligence Blog</title>
+    <meta name="description" content="OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is no">
+    <meta name="keywords" content="">
+    <meta name="author" content="Sovereign Intelligence Team">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://sovereign-api.com/blogs/openclaw-integration-guide/">
+
+    <!-- OpenGraph -->
+    <meta property="og:title" content="Openclaw Integration Guide">
+    <meta property="og:description" content="OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is no">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sovereign-api.com/blogs/openclaw-integration-guide/">
+    <meta property="og:site_name" content="Sovereign API Blog">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Openclaw Integration Guide">
+    <meta name="twitter:description" content="OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is no">
+
+    <!-- Schema Markup (auto-injected by build_blog.py) -->
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Openclaw Integration Guide",
+  "description": "OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs \u2014 and Sovereign API is no",
+  "datePublished": "2026-03-11",
+  "dateModified": "2026-03-11",
+  "author": {
+    "@type": "Organization",
+    "name": "Sovereign Intelligence Team",
+    "url": "https://sovereign-api.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sovereign API",
+    "url": "https://sovereign-api.com"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sovereign-api.com/blogs/openclaw-integration-guide/"
+  },
+  "url": "https://sovereign-api.com/blogs/openclaw-integration-guide/"
+}</script>
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://sovereign-api.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://sovereign-api.com/blogs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Openclaw Integration Guide",
+      "item": "https://sovereign-api.com/blogs/openclaw-integration-guide/"
+    }
+  ]
+}</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #000000;
+            --bg-card: #000000;
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #ffffff;
+            --gradient-main: linear-gradient(135deg, #ffffff, #ffffff);
+            --font-body: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--text-primary);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 16px 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-primary);
+        }
+
+        .nav-logo .logo-icon {
+            display: none;
+        }
+
+        .article-header {
+            padding: 140px 0 60px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .article-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .article-meta {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .article-content {
+            padding: 60px 0;
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        /* Markdown Styling */
+        .article-content h1,
+        .article-content h2,
+        .article-content h3 {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        .article-content h2 {
+            font-size: 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .article-content h3 {
+            font-size: 22px;
+        }
+
+        .article-content p {
+            margin-bottom: 24px;
+        }
+
+        .article-content ul,
+        .article-content ol {
+            margin-bottom: 24px;
+            padding-left: 24px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .article-content pre {
+            background: #0a0c16;
+            padding: 20px;
+            border-radius: 0;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .article-content code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 0;
+        }
+
+        .article-content pre code {
+            background: transparent;
+            padding: 0;
+            color: #a9b7c6;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        .article-content img {
+            max-width: 100%;
+            border-radius: 0;
+            margin: 32px 0;
+            border: 1px solid var(--border);
+        }
+
+        .article-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .article-content th,
+        .article-content td {
+            padding: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .article-content th {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="nav-logo" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.1em;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0H10V10H0V0Z" />
+                    <path d="M14 14H24V24H14V14Z" />
+                    <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
+                    <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
+                </svg>
+                Sovereign API
+            </a>
+            <a href="/blogs/" style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Blog</a>
+        </div>
+    </nav>
+
+    <article class="article-header">
+        <div class="container">
+            <h1 class="article-title">Openclaw Integration Guide</h1>
+            <div class="article-meta">
+                <span>2026-03-11</span>
+                <span>Sovereign Intelligence Team</span>
+            </div>
+        </div>
+    </article>
+
+    <main class="container article-content">
+        <h1>How to Connect OpenClaw to Sovereign API</h1>
+<p><em>Published: February 27, 2026</em></p>
+<p>OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is now a first-class citizen.</p>
+<p>This guide walks you through connecting OpenClaw to Sovereign API, including the configuration gotchas that will save you hours of debugging.</p>
+<h2>Prerequisites</h2>
+<ul>
+<li>Node.js 18+</li>
+<li>OpenClaw installed (<code>npm install -g openclaw</code>)</li>
+<li>A Sovereign API key (<a href="https://api.sovereign-api.com/v1/register">register here</a>)</li>
+</ul>
+<h2>Step 1: Configure the Provider</h2>
+<p>Add Sovereign to your <code>~/.openclaw/openclaw.json</code> under <code>models.providers</code>:</p>
+<pre><code class="language-json">&quot;sovereign&quot;: {
+  &quot;baseUrl&quot;: &quot;https://api.sovereign-api.com/v1&quot;,
+  &quot;apiKey&quot;: &quot;${SOVEREIGN_API_KEY}&quot;,
+  &quot;api&quot;: &quot;openai-completions&quot;,
+  &quot;models&quot;: [
+    {
+      &quot;id&quot;: &quot;sovereign/gpt-5.2-chat&quot;,
+      &quot;name&quot;: &quot;Sovereign GPT-5.2&quot;,
+      &quot;reasoning&quot;: false,
+      &quot;input&quot;: [&quot;text&quot;],
+      &quot;contextWindow&quot;: 1000000,
+      &quot;maxTokens&quot;: 8192
+    },
+    {
+      &quot;id&quot;: &quot;sovereign/deepseek-r1&quot;,
+      &quot;name&quot;: &quot;Sovereign DeepSeek R1&quot;,
+      &quot;reasoning&quot;: true,
+      &quot;input&quot;: [&quot;text&quot;],
+      &quot;contextWindow&quot;: 128000,
+      &quot;maxTokens&quot;: 8192
+    }
+  ]
+}
+</code></pre>
+<blockquote>
+<p><strong>⚠️ Critical:</strong> The <code>baseUrl</code> must end with <code>/v1</code>. OpenClaw's internal OpenAI SDK automatically appends <code>/chat/completions</code> to the base URL. If you omit <code>/v1</code>, requests will hit the wrong path and you will get blank responses.</p>
+</blockquote>
+<h2>Step 2: Set Your API Key</h2>
+<p>Add your key to <code>~/.openclaw/.env</code>:</p>
+<pre><code>SOVEREIGN_API_KEY=sk-sov-your-key-here
+</code></pre>
+<h2>Step 3: Set the Default Model</h2>
+<pre><code class="language-bash">npx openclaw config set agents.defaults.model.primary sovereign/gpt-5.2-chat
+</code></pre>
+<h2>Step 4: Run</h2>
+<pre><code class="language-bash">npx openclaw gateway start
+npx openclaw tui
+</code></pre>
+<p>Type a message and watch it stream back from Sovereign API.</p>
+<h2>How It Works Under the Hood</h2>
+<p>When you send a message in OpenClaw:</p>
+<ol>
+<li><strong>OpenClaw Gateway</strong> receives your message via WebSocket</li>
+<li><strong>Pi (OpenClaw's LLM engine)</strong> formats it as an OpenAI Chat Completions request</li>
+<li>The request hits <code>https://api.sovereign-api.com/v1/chat/completions</code></li>
+<li><strong>Sovereign API</strong> routes to the configured backend model via OpenRouter</li>
+<li><strong>The SSE Normalizer</strong> strips non-standard fields from the response stream</li>
+<li>OpenClaw receives a clean, spec-compliant stream and renders the text</li>
+</ol>
+<h3>Why the SSE Normalizer Matters</h3>
+<p>Sovereign API proxies requests through OpenRouter, which supports 280+ models. However, OpenRouter adds proprietary fields to their SSE (Server-Sent Events) streams:</p>
+<ul>
+<li><code>provider: "OpenAI"</code> — identifies the upstream provider</li>
+<li><code>native_finish_reason: "stop"</code> — provider-specific finish reason</li>
+<li><code>cost</code>, <code>is_byok</code>, <code>cost_details</code> — billing metadata</li>
+</ul>
+<p>These fields are not part of the official OpenAI specification. Strict clients like OpenClaw's internal parser will silently reject chunks containing non-standard fields, resulting in blank responses.</p>
+<p>Sovereign API's built-in normalizer intercepts every chunk, strips non-standard fields, and forwards only spec-compliant JSON. This guarantees compatibility with any OpenAI-compatible client.</p>
+<h2>Troubleshooting</h2>
+<h3>Blank Bubbles / No Response Text</h3>
+<p><strong>Cause:</strong> The most common cause is a missing <code>/v1</code> in the <code>baseUrl</code>. Without it, requests hit the wrong endpoint.</p>
+<p><strong>Fix:</strong> Ensure your <code>baseUrl</code> is <code>https://api.sovereign-api.com/v1</code> (not <code>https://api.sovereign-api.com</code>).</p>
+<h3>Credits Deducted But No Text Displayed</h3>
+<p><strong>Cause:</strong> The <code>api</code> field in the provider config is wrong or missing.</p>
+<p><strong>Fix:</strong> Ensure <code>"api": "openai-completions"</code> is set in the sovereign provider block.</p>
+<h3>Connection Refused</h3>
+<p><strong>Cause:</strong> The OpenClaw gateway is not running.</p>
+<p><strong>Fix:</strong> Run <code>npx openclaw gateway start</code> before launching the TUI or Web UI.</p>
+<h3>Model Not Found</h3>
+<p><strong>Cause:</strong> The model ID doesn't match any registered model.</p>
+<p><strong>Fix:</strong> Check available models with <code>curl https://api.sovereign-api.com/v1/models</code> and use the exact <code>sovereign/model-name</code> format.</p>
+<hr />
+<h2>Available Models</h2>
+<p>Sovereign API provides access to 280+ models. Popular choices for OpenClaw:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Best For</th>
+<th>Reasoning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sovereign/gpt-5.2-chat</code></td>
+<td>General conversation, coding</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>sovereign/deepseek-r1</code></td>
+<td>Complex reasoning, math</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>sovereign/claude-3.7-sonnet</code></td>
+<td>Writing, analysis</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>sovereign/llama-3.3-70b-instruct</code></td>
+<td>Budget-friendly tasks</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Browse all models: <code>curl https://api.sovereign-api.com/v1/models</code></p>
+<hr />
+<p><em>Sovereign API: Give your AI a wallet, not a credit card.</em></p>
+    </main>
+
+    <footer
+        style="text-align: center; padding: 60px 0; border-top: 1px solid var(--border); margin-top: 60px; color: var(--text-secondary); font-size: 14px;">
+        <div class="container">
+            © 2026 Sovereign API. All autonomous rights reserved.
+        </div>
+    </footer>
+</body>
+
+</html>

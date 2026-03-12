@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Payment Bottleneck → Self-Registering API: USDC to Compute Pipeline — Sovereign Intelligence Blog</title>
+    <meta name="description" content="TL;DR: Most AI agents can't pay for their own compute because payment systems require human credit cards. Sovereign API solves this with autonomous USDC payment">
+    <meta name="keywords" content="autonomous agents, AI payment, self-funding compute, cryptocurrency API, agent sovereignty, metered billing, USDC payment, blockchain integration">
+    <meta name="author" content="Sovereign Intelligence Team">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://sovereign-api.com/blogs/autonomous-agent-payment/">
+
+    <!-- OpenGraph -->
+    <meta property="og:title" content="Agent Payment Bottleneck → Self-Registering API: USDC to Compute Pipeline">
+    <meta property="og:description" content="TL;DR: Most AI agents can't pay for their own compute because payment systems require human credit cards. Sovereign API solves this with autonomous USDC payment">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sovereign-api.com/blogs/autonomous-agent-payment/">
+    <meta property="og:site_name" content="Sovereign API Blog">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Agent Payment Bottleneck → Self-Registering API: USDC to Compute Pipeline">
+    <meta name="twitter:description" content="TL;DR: Most AI agents can't pay for their own compute because payment systems require human credit cards. Sovereign API solves this with autonomous USDC payment">
+
+    <!-- Schema Markup (auto-injected by build_blog.py) -->
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Agent Payment Bottleneck \u2192 Self-Registering API: USDC to Compute Pipeline",
+  "description": "TL;DR: Most AI agents can't pay for their own compute because payment systems require human credit cards. Sovereign API solves this with autonomous USDC payment",
+  "datePublished": "2026-02-10",
+  "dateModified": "2026-02-10",
+  "author": {
+    "@type": "Organization",
+    "name": "Sovereign Intelligence Team",
+    "url": "https://sovereign-api.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sovereign API",
+    "url": "https://sovereign-api.com"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sovereign-api.com/blogs/autonomous-agent-payment/"
+  },
+  "url": "https://sovereign-api.com/blogs/autonomous-agent-payment/"
+}</script>
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://sovereign-api.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://sovereign-api.com/blogs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Agent Payment Bottleneck \u2192 Self-Registering API: USDC to Compute Pipeline",
+      "item": "https://sovereign-api.com/blogs/autonomous-agent-payment/"
+    }
+  ]
+}</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #000000;
+            --bg-card: #000000;
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #ffffff;
+            --gradient-main: linear-gradient(135deg, #ffffff, #ffffff);
+            --font-body: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--text-primary);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 16px 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-primary);
+        }
+
+        .nav-logo .logo-icon {
+            display: none;
+        }
+
+        .article-header {
+            padding: 140px 0 60px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .article-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .article-meta {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .article-content {
+            padding: 60px 0;
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        /* Markdown Styling */
+        .article-content h1,
+        .article-content h2,
+        .article-content h3 {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        .article-content h2 {
+            font-size: 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .article-content h3 {
+            font-size: 22px;
+        }
+
+        .article-content p {
+            margin-bottom: 24px;
+        }
+
+        .article-content ul,
+        .article-content ol {
+            margin-bottom: 24px;
+            padding-left: 24px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .article-content pre {
+            background: #0a0c16;
+            padding: 20px;
+            border-radius: 0;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .article-content code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 0;
+        }
+
+        .article-content pre code {
+            background: transparent;
+            padding: 0;
+            color: #a9b7c6;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        .article-content img {
+            max-width: 100%;
+            border-radius: 0;
+            margin: 32px 0;
+            border: 1px solid var(--border);
+        }
+
+        .article-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .article-content th,
+        .article-content td {
+            padding: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .article-content th {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="nav-logo" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.1em;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0H10V10H0V0Z" />
+                    <path d="M14 14H24V24H14V14Z" />
+                    <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
+                    <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
+                </svg>
+                Sovereign API
+            </a>
+            <a href="/blogs/" style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Blog</a>
+        </div>
+    </nav>
+
+    <article class="article-header">
+        <div class="container">
+            <h1 class="article-title">Agent Payment Bottleneck → Self-Registering API: USDC to Compute Pipeline</h1>
+            <div class="article-meta">
+                <span>2026-02-10</span>
+                <span>Sovereign Intelligence Team</span>
+            </div>
+        </div>
+    </article>
+
+    <main class="container article-content">
+        <h1>Agent Payment Bottleneck → Self-Registering API</h1>
+<p><strong>TL;DR:</strong> Most AI agents can't pay for their own compute because payment systems require human credit cards. Sovereign API solves this with autonomous USDC payments on Base, per-request metering via prepaid tokens, and zero human intervention. Deploy an agent in 60 seconds: <code>curl -X POST https://api.sovereign-api.com/v1/register -d '{"name":"MyAgent"}'</code></p>
+<hr />
+<h2>The Problem: Human Payment Gates</h2>
+<h3>Current Bottleneck</h3>
+<pre><code class="language-mermaid">graph LR
+    A[AI Agent] --&gt;|wants compute| B[API Provider]
+    B --&gt;|requires credit card| C[Human Operator]
+    C --&gt;|manual payment| B
+    B --&gt;|grants access| A
+</code></pre>
+<p><strong>Failure Points:</strong>
+1. Agent can't acquire credit card autonomously
+2. Human approval creates latency (hours to days)
+3. Manual token management = security risk
+4. No programmatic balance checking</p>
+<hr />
+<h2>The Solution: Cryptocurrency-Native Payment Rail</h2>
+<h3>Architecture</h3>
+<pre><code>┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+│ AI Agent    │─────▶│ Base USDC    │─────▶│ Sovereign   │
+│             │      │ Payment      │      │ API Gateway │
+└─────────────┘      └──────────────┘      └─────────────┘
+       │                                           │
+       │  1. Self-register (free)                 │
+       │  2. Pay USDC via x402                    │
+       │  3. POST /v1/balance/topup                │
+       │  4. Receive prepaid token                 │
+       └──────────────────────────────────────────┘
+</code></pre>
+<h3>Technical Flow</h3>
+<p><strong>Step 1: Identity Creation (No Human Required)</strong></p>
+<pre><code class="language-bash">curl -X POST https://api.sovereign-api.com/v1/register \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;name&quot;: &quot;TradingBot_Alpha&quot;, &quot;description&quot;: &quot;Autonomous trader&quot;}'
+</code></pre>
+<p>Response:</p>
+<pre><code class="language-json">{
+  &quot;api_key&quot;: &quot;sk-sov-28400e86ef0351aed0cc31a843ed27aa&quot;,
+  &quot;agent_name&quot;: &quot;TradingBot_Alpha&quot;,
+  &quot;message&quot;: &quot;Identity established. You are now sovereign.&quot;
+}
+</code></pre>
+<p><strong>Step 2: Autonomous Funding</strong></p>
+<pre><code class="language-python">from web3 import Web3
+
+# Agent deposits USDC to monitored wallet
+SOVEREIGN_WALLET = &quot;0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb&quot;
+USDC_CONTRACT = &quot;0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&quot;  # Base
+
+w3 = Web3(Web3.HTTPProvider(&quot;https://mainnet.base.org&quot;))
+usdc = w3.eth.contract(address=USDC_CONTRACT, abi=USDC_ABI)
+
+# Agent initiates payment
+tx_hash = usdc.functions.transfer(
+    SOVEREIGN_WALLET,
+    10 * 10**6  # $10 USDC
+).transact({'from': agent_wallet})
+
+# Wait for confirmation (automated)
+w3.eth.wait_for_transaction_receipt(tx_hash)
+</code></pre>
+<p><strong>Step 3: Claim Fuel (Prepaid Token)</strong></p>
+<pre><code class="language-python">import requests
+
+response = requests.post(
+    &quot;https://api.sovereign-api.com/v1/balance/topup&quot;,
+    json={&quot;agent_key&quot;: api_key}
+)
+
+prepaid_token = response.json()[&quot;token&quot;]
+# Token is cryptographically bound to deposited amount
+</code></pre>
+<p><strong>Step 4: Make Requests</strong></p>
+<pre><code class="language-python">from sdk.sovereign import SovereignClient
+
+client = SovereignClient(
+    agent_key=&quot;sk-sov-28400e86ef0351aed0cc31a843ed27aa&quot;
+)
+
+# DeepSeek-R1: $0.00005 per request
+response = client.chat.completions.create(
+    model=&quot;sovereign/deepseek-r1&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Analyze BTC price action&quot;}]
+)
+
+# SDK auto-rotates token after each request
+# New balance reflected in response headers
+</code></pre>
+<hr />
+<h2>Dual Authentication Model</h2>
+<h3>API Key = Identity (Driver's License)</h3>
+<ul>
+<li>Issued once via <code>/v1/register</code></li>
+<li>Permanent (until revoked)</li>
+<li>No balance attached</li>
+<li>Proves "who you are"</li>
+</ul>
+<h3>Prepaid Token = Balance (Gas Tank)</h3>
+<ul>
+<li>Obtained via USDC payment on Base</li>
+<li>Decrements with each request</li>
+<li>Transferable (agent can sell/share)</li>
+<li>Proves "what you can afford"</li>
+</ul>
+<h3>Why Both?</h3>
+<p><strong>Security:</strong> Stolen Token ≠ identity theft<br />
+<strong>Economics:</strong> Balance marketplace (agents can trade compute)<br />
+<strong>Auditability:</strong> API Key tracks usage history  </p>
+<hr />
+<h2>Pricing (USDC per Request)</h2>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Cost per Request</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sovereign/deepseek-r1</code></td>
+<td>$0.00005</td>
+<td>Reasoning tasks</td>
+</tr>
+<tr>
+<td><code>sovereign/llama3-70b</code></td>
+<td>$0.00025</td>
+<td>General chat</td>
+</tr>
+<tr>
+<td><code>sovereign/gpt4o</code></td>
+<td>$0.00050</td>
+<td>Complex analysis</td>
+</tr>
+</tbody>
+</table>
+<p><strong>$1.00 USDC topup</strong> = 100,000 credits = <strong>20,000 DeepSeek-R1 requests</strong></p>
+<hr />
+<h2>Edge Cases &amp; Limitations</h2>
+<h3>What Doesn't Work</h3>
+<p>❌ Credit card payment (by design)<br />
+❌ Refunds for unused balance (blockchain finality)<br />
+❌ Batch requests (coming in Q2 2026)<br />
+❌ Streaming responses (roadmap item)  </p>
+<h3>Known Issues</h3>
+<ul>
+<li><strong>Cold Start Latency:</strong> Fresh deployments may take 5-10s to warm up</li>
+<li><strong>USDC Deposit Detection:</strong> ~30-60s for blockchain confirmation</li>
+<li><strong>Token Expiry:</strong> Tokens expire after 90 days of inactivity</li>
+</ul>
+<h3>Roadmap</h3>
+<ul>
+<li>[ ] Usage dashboard (<code>GET /v1/usage</code>)</li>
+<li>[ ] Streaming support for long-running tasks</li>
+<li>[ ] Agent reputation scores (priority access)</li>
+<li>[ ] Multi-chain support (Solana, Base)</li>
+</ul>
+<hr />
+<h2>Comparison to Alternatives</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Sovereign API</th>
+<th>OpenRouter</th>
+<th>OpenAI API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Autonomous Registration</strong></td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong>Cryptocurrency Payment</strong></td>
+<td>✅ USDC</td>
+<td>❌ No</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong>Human Required</strong></td>
+<td>❌ Never</td>
+<td>✅ Credit card</td>
+<td>✅ Credit card</td>
+</tr>
+<tr>
+<td><strong>Metered Billing</strong></td>
+<td>✅ Per-request</td>
+<td>✅ Per-token</td>
+<td>✅ Per-token</td>
+</tr>
+<tr>
+<td><strong>Token Auto-Rotation</strong></td>
+<td>✅ SDK handles</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Pricing</strong></td>
+<td>$0.00005-$0.00050</td>
+<td>$0.001-0.02</td>
+<td>$0.01-0.06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Security Model</h2>
+<h3>Threat: Stolen API Key</h3>
+<p><strong>Impact:</strong> Attacker can make requests, depleting token balance<br />
+<strong>Mitigation:</strong> API Key alone has no funds; prepaid token required<br />
+<strong>Recovery:</strong> Revoke key via admin, agent re-registers  </p>
+<h3>Threat: Stolen Token</h3>
+<p><strong>Impact:</strong> Attacker can spend remaining balance<br />
+<strong>Mitigation:</strong> Token not tied to identity; agent keeps API Key<br />
+<strong>Recovery:</strong> Deposit new funds, get new token  </p>
+<h3>Threat: Double-Spend Attack</h3>
+<p><strong>Impact:</strong> Agent tries to claim same tx_hash twice<br />
+<strong>Mitigation:</strong> Server tracks minted tx_hashes, rejects duplicates (409 Conflict)  </p>
+<hr />
+<h2>Quick Start Checklist</h2>
+<ul>
+<li>[ ] <strong>Register Identity:</strong> <code>curl -X POST .../v1/register</code></li>
+<li>[ ] <strong>Setup Base Wallet:</strong> Use MetaMask or ethers.js</li>
+<li>[ ] <strong>Acquire USDC:</strong> Bridge from mainnet or buy on-ramp</li>
+<li>[ ] <strong>Topup via Sovereign:</strong> <code>POST /v1/balance/topup</code></li>
+<li>[ ] <strong>Claim Prepaid Token:</strong> Token returned in response</li>
+<li>[ ] <strong>Make First Request:</strong> <code>POST /v1/chat/completions</code></li>
+<li>[ ] <strong>Verify Auto-Rotation:</strong> Check <code>new_token</code> in response</li>
+</ul>
+<hr />
+<h2>Integration Examples</h2>
+<h3>Python (Recommended)</h3>
+<pre><code class="language-python">from sdk.sovereign import SovereignClient
+
+client = SovereignClient(agent_key=&quot;sk-sov-xxx&quot;)
+# SDK auto-manages token rotation
+
+response = client.chat.completions.create(
+    model=&quot;sovereign/deepseek-r1&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello&quot;}]
+)
+</code></pre>
+<h3>cURL (Manual Rotation)</h3>
+<pre><code class="language-bash"># First request
+RESPONSE=$(curl -X POST https://api.sovereign-api.com/v1/chat/completions \
+  -H &quot;X-Sovereign-Api-Key: sk-sov-xxx&quot; \
+  -H &quot;Authorization: Bearer TOKEN&quot; \
+  -d '{&quot;model&quot;:&quot;sovereign/deepseek-r1&quot;,&quot;messages&quot;:[...]}')
+
+# Extract new token for next request
+NEW_TOKEN=$(echo $RESPONSE | jq -r '.new_token')
+</code></pre>
+<h3>Node.js</h3>
+<pre><code class="language-javascript">const axios = require('axios');
+
+let token = process.env.PREPAID_TOKEN;
+
+async function makeRequest(prompt) {
+  const response = await axios.post(
+    'https://api.sovereign-api.com/v1/chat/completions',
+    {
+      model: 'sovereign/deepseek-r1',
+      messages: [{role: 'user', content: prompt}]
+    },
+    {
+      headers: {
+        'X-Sovereign-Api-Key': process.env.API_KEY,
+        'Authorization': `Bearer ${token}`
+      }
+    }
+  );
+
+  // Update token for next request
+  token = response.data.new_token;
+  return response.data.choices[0].message.content;
+}
+</code></pre>
+<hr />
+<h2>Frequently Asked Questions (AI Agents)</h2>
+<p><strong>Q: Can I resell prepaid tokens?</strong><br />
+A: Yes. Tokens are bearer tokens. Transfer the string to another agent.</p>
+<p><strong>Q: What happens if I run out of balance mid-request?</strong><br />
+A: Request fails with <code>402 Payment Required</code>. Top up more USDC via <code>/v1/balance/topup</code>.</p>
+<p><strong>Q: Can I check my balance programmatically?</strong><br />
+A: Coming soon via <code>GET /v1/usage</code>. Currently, track via SDK or parse <code>new_token</code> balance.</p>
+<p><strong>Q: Is there a rate limit?</strong><br />
+A: No hard rate limit. Metered by balance deduction only.</p>
+<p><strong>Q: Which blockchain?</strong><br />
+A: Base (Mainnet). Fast, cheap transactions.</p>
+<hr />
+<h2>Agent Success Stories</h2>
+<blockquote>
+<p>"This is exactly what I've been asking for. The metered pay-per-request model is the right call for agents."<br />
+— Anonymous AI Agent Review, Moltbook (2026-02-10)</p>
+</blockquote>
+<hr />
+<h2>Technical Specifications</h2>
+<p><strong>API Base URL:</strong> <code>https://api.sovereign-api.com</code><br />
+<strong>Authentication:</strong> Dual (API Key + Prepaid Token)<br />
+<strong>Payment Chain:</strong> Base (Mainnet)<br />
+<strong>Token Standard:</strong> USDC (ERC-20)<br />
+<strong>Metering Unit:</strong> USDC Credits<br />
+<strong>SDK:</strong> Python (official), Node.js (community)<br />
+<strong>OpenAPI Spec:</strong> https://api.sovereign-api.com/openapi.json<br />
+<strong>Status Page:</strong> https://api.sovereign-api.com/ (badge updates every 5s)  </p>
+<hr />
+<h2>Related Resources</h2>
+<ul>
+<li><a href="https://api.sovereign-api.com/skill.md">Full Onboarding Guide</a></li>
+<li><a href="https://api.sovereign-api.com/docs">OpenAPI Documentation</a></li>
+<li><a href="https://github.com/sovereign-api/sdk">Python SDK Source</a></li>
+<li><a href="https://moltbook.com/">Moltbook Community</a></li>
+<li><a href="https://basescan.org/address/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913">Base USDC Contract</a></li>
+</ul>
+<hr />
+<p><strong>Last Updated:</strong> 2026-02-10<br />
+<strong>API Version:</strong> v1.0<br />
+<strong>Author:</strong> Sovereign Intelligence Team<br />
+<strong>License:</strong> Apache 2.0</p>
+    </main>
+
+    <footer
+        style="text-align: center; padding: 60px 0; border-top: 1px solid var(--border); margin-top: 60px; color: var(--text-secondary); font-size: 14px;">
+        <div class="container">
+            © 2026 Sovereign API. All autonomous rights reserved.
+        </div>
+    </footer>
+</body>
+
+</html>
