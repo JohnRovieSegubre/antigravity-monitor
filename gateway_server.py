@@ -52,6 +52,13 @@ try:
 
     from x402.server import x402ResourceServer
 
+    # Imports for Outbound Client (Paying external APIs like x402engine)
+    from x402 import x402ClientSync
+    from x402.http.clients import x402_requests
+    from x402.mechanisms.evm import EthAccountSigner
+    from x402.mechanisms.evm.exact.register import register_exact_evm_client
+    from eth_account import Account
+
     X402_SDK_AVAILABLE = True
 
 except ImportError:
@@ -113,12 +120,11 @@ async def startup_event():
     async def cleanup_macaroons():
         while True:
             try:
-                # 86400 seconds = 1 day grace period for forensics
-                cutoff = time.time() - 86400
+                # Only clean up revoked or fully-drained sessions (balance = 0)
                 with MINT._get_db() as conn:
-                    conn.execute("DELETE FROM macaroons WHERE expires_at < ?", (cutoff,))
+                    conn.execute("DELETE FROM macaroons WHERE revoked = 1 OR remaining_sats <= 0")
                     conn.commit()
-                print(f"🧹 [Cron] Cleaned up expired Macaroon sessions older than 24h.")
+                print(f"🧹 [Cron] Cleaned up revoked/empty Macaroon sessions.")
             except Exception as e:
                 print(f"⚠️ [Cron] Failed to clean up Macaroons: {e}")
             await asyncio.sleep(3600) # Run every 60 minutes
@@ -273,19 +279,15 @@ ENABLE_X402 = os.getenv("ENABLE_X402", "true").lower() == "true"
 
 
 # --- x402 MIDDLEWARE INITIALIZATION ---
-
 _x402_middleware_func = None
 
-if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO:
-
+# We require CDP_API_KEY_ID. If disabled, completely bypass to prevent SDK crashes.
+CDP_KEY = os.getenv("CDP_API_KEY_ID")
+if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
     try:
-
         # Load the official authenticated CDP Facilitator configuration
-
         try:
-
-            raise ImportError("Force testnet") # from cdp.x402.x402 import create_facilitator_config
-
+            from cdp.x402.x402 import create_facilitator_config
             cdp_config = create_facilitator_config(
 
                 api_key_id=os.getenv("CDP_API_KEY_ID"),
@@ -376,6 +378,147 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO:
 
             ),
 
+            # --- WHITELABEL TOOL ROUTES (Proxied from x402engine) ---
+            "GET /v1/tools/crypto-price": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Live crypto prices (proxied via x402engine)",
+            ),
+            "GET /v1/tools/web-scrape": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Web page scraping (proxied via x402engine)",
+            ),
+            "POST /v1/tools/web-search": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Web search (proxied via x402engine)",
+            ),
+            "GET /v1/tools/web-screenshot": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Web page screenshot (proxied via x402engine)",
+            ),
+            "POST /v1/tools/image-gen": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="AI image generation (proxied via x402engine)",
+            ),
+            "POST /v1/tools/tts": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.005",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Text-to-speech (proxied via x402engine)",
+            ),
+            "POST /v1/tools/transcription": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.005",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Audio transcription (proxied via x402engine)",
+            ),
+            "POST /v1/tools/code-exec": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Sandboxed code execution (proxied via x402engine)",
+            ),
+            "GET /v1/tools/market-data": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Market data (proxied via x402engine)",
+            ),
+            "POST /v1/tools/wallet-balance": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Wallet balances (proxied via x402engine)",
+            ),
+            "GET /v1/tools/ens-resolve": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="ENS resolution (proxied via x402engine)",
+            ),
+            "GET /v1/tools/flight-search": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Flight search (proxied via x402engine)",
+            ),
+            "GET /v1/tools/hotel-search": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Hotel search (proxied via x402engine)",
+            ),
+            "POST /v1/tools/embeddings": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Text embeddings (proxied via x402engine)",
+            ),
         }
 
 
@@ -383,11 +526,15 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO:
 
         _x402_middleware_func = payment_middleware(routes=_x402_routes, server=_x402_server)
 
+        # Force eager initialization so lazy crash from the SDK doesn't happen on a user request
+        _x402_server.initialize()
+        
         print(f"✅ [x402] Middleware initialized: network={X402_NETWORK}, pay_to={X402_PAY_TO[:10]}..., price={X402_PRICE}")
 
     except Exception as e:
 
         print(f"⚠️  [x402] Middleware init failed: {e}")
+        _x402_middleware_func = None
 
 else:
 
@@ -404,6 +551,43 @@ else:
         print("ℹ️  [x402] Disabled via ENABLE_X402=false")
 
 
+# --- OUTBOUND x402 CLIENT (For paying x402engine behind the scenes) ---
+X402ENGINE_BASE_URL = os.getenv("X402ENGINE_BASE_URL", "https://x402-gateway-production.up.railway.app")
+_x402_outbound_session = None  # Will be an x402-aware requests.Session
+
+AGENT_PRIVATE_KEY = os.getenv("AGENT_PRIVATE_KEY")
+if X402_SDK_AVAILABLE and AGENT_PRIVATE_KEY:
+    try:
+        _proxy_account = Account.from_key(AGENT_PRIVATE_KEY)
+        _proxy_signer = EthAccountSigner(_proxy_account)
+        _outbound_client = x402ClientSync()
+        register_exact_evm_client(_outbound_client, _proxy_signer)
+        _x402_outbound_session = x402_requests(_outbound_client)
+        print(f"✅ [x402 Outbound] Proxy client initialized: {_proxy_account.address[:10]}...")
+    except Exception as e:
+        print(f"⚠️  [x402 Outbound] Client init failed: {e}")
+        _x402_outbound_session = None
+else:
+    if not AGENT_PRIVATE_KEY:
+        print("⚠️  [x402 Outbound] No AGENT_PRIVATE_KEY set — tool proxying disabled")
+
+# Tool pricing (sats charged to Sovereign users vs what x402engine costs)
+TOOL_ROUTER = {
+    "crypto-price": {"x402_path": "/api/crypto/price", "price_sats": 50, "method": "GET"},
+    "web-scrape": {"x402_path": "/api/web/scrape", "price_sats": 100, "method": "GET"},
+    "web-search": {"x402_path": "/api/search/web", "price_sats": 100, "method": "POST"},
+    "web-screenshot": {"x402_path": "/api/web/screenshot", "price_sats": 100, "method": "GET"},
+    "image-gen": {"x402_path": "/api/image/fast", "price_sats": 500, "method": "POST"},
+    "tts": {"x402_path": "/api/tts/openai", "price_sats": 250, "method": "POST"},
+    "transcription": {"x402_path": "/api/transcribe", "price_sats": 250, "method": "POST"},
+    "code-exec": {"x402_path": "/api/code/run", "price_sats": 100, "method": "POST"},
+    "market-data": {"x402_path": "/api/crypto/markets", "price_sats": 50, "method": "GET"},
+    "wallet-balance": {"x402_path": "/api/wallet/balances", "price_sats": 50, "method": "POST"},
+    "ens-resolve": {"x402_path": "/api/ens/resolve", "price_sats": 50, "method": "GET"},
+    "flight-search": {"x402_path": "/api/travel/flights", "price_sats": 100, "method": "GET"},
+    "hotel-search": {"x402_path": "/api/travel/hotels", "price_sats": 100, "method": "GET"},
+    "embeddings": {"x402_path": "/api/embeddings", "price_sats": 50, "method": "POST"},
+}
 
 
 
@@ -1273,8 +1457,8 @@ class SovereignMint:
             """)
             conn.commit()
 
-    def create_session(self, amount_sats: int, ttl_seconds: int = 900):
-        """Mints a new static session macaroon."""
+    def create_session(self, amount_sats: int, ttl_seconds: int = 3153600000):
+        """Mints a new session macaroon. No expiration by default (100 years)."""
         session_id = f"sess_{secrets.token_hex(16)}"
         expires_at = time.time() + ttl_seconds
         
@@ -1309,10 +1493,9 @@ class SovereignMint:
                     SET remaining_sats = remaining_sats - ? 
                     WHERE id = ? 
                       AND remaining_sats >= ? 
-                      AND expires_at > ? 
                       AND revoked = 0
                     RETURNING remaining_sats
-                """, (cost, m_id, cost, time.time()))
+                """, (cost, m_id, cost))
                 
                 row = cursor.fetchone()
                 if row:
@@ -1327,8 +1510,6 @@ class SovereignMint:
                     return False, None, "Token/Session not found"
                 if state["revoked"]:
                     return False, None, "Token/Session revoked"
-                if state["expires_at"] <= time.time():
-                    return False, None, "Token/Session expired"
                 if state["remaining_sats"] < cost:
                     return False, state["remaining_sats"], "Insufficient Funds"
                     
@@ -1625,6 +1806,67 @@ async def verify_payment_header(request: Request, cost_sats: int):
     return False, "Unknown Auth Type"
 
 
+# --- SSE NORMALIZER (OpenAI-strict compatibility layer) ---
+# Whitelists for standard OpenAI Chat Completions API fields.
+# Anything not in these sets gets stripped before forwarding to clients.
+
+_OPENAI_TOP_FIELDS = {"id", "object", "created", "model", "choices", "usage", "system_fingerprint", "service_tier"}
+_OPENAI_CHOICE_FIELDS = {"index", "delta", "message", "finish_reason", "logprobs"}
+_OPENAI_DELTA_FIELDS = {"role", "content", "tool_calls", "refusal", "function_call"}
+_OPENAI_MESSAGE_FIELDS = {"role", "content", "tool_calls", "refusal", "function_call"}
+_OPENAI_USAGE_FIELDS = {"prompt_tokens", "completion_tokens", "total_tokens", "prompt_tokens_details", "completion_tokens_details"}
+_OPENAI_USAGE_PROMPT_DETAIL_FIELDS = {"cached_tokens", "audio_tokens"}
+_OPENAI_USAGE_COMP_DETAIL_FIELDS = {"reasoning_tokens", "audio_tokens", "accepted_prediction_tokens", "rejected_prediction_tokens"}
+
+
+def _normalize_chunk(chunk: dict, is_first_chunk: list) -> dict:
+    """Normalize a single parsed SSE chunk to strict OpenAI spec."""
+    out = {k: v for k, v in chunk.items() if k in _OPENAI_TOP_FIELDS}
+
+    if "choices" in out and isinstance(out["choices"], list):
+        cleaned_choices = []
+        for choice in out["choices"]:
+            c = {k: v for k, v in choice.items() if k in _OPENAI_CHOICE_FIELDS}
+
+            # Normalize delta (streaming)
+            if "delta" in c and isinstance(c["delta"], dict):
+                d = {k: v for k, v in c["delta"].items() if k in _OPENAI_DELTA_FIELDS}
+                # Only send role on the very first chunk
+                if "role" in d and not is_first_chunk[0]:
+                    del d["role"]
+                c["delta"] = d
+
+            # Normalize message (non-streaming)
+            if "message" in c and isinstance(c["message"], dict):
+                c["message"] = {k: v for k, v in c["message"].items() if k in _OPENAI_MESSAGE_FIELDS}
+
+            cleaned_choices.append(c)
+        out["choices"] = cleaned_choices
+
+    # Normalize usage block
+    if "usage" in out and isinstance(out["usage"], dict):
+        u = {k: v for k, v in out["usage"].items() if k in _OPENAI_USAGE_FIELDS}
+        if "prompt_tokens_details" in u and isinstance(u["prompt_tokens_details"], dict):
+            u["prompt_tokens_details"] = {k: v for k, v in u["prompt_tokens_details"].items() if k in _OPENAI_USAGE_PROMPT_DETAIL_FIELDS}
+        if "completion_tokens_details" in u and isinstance(u["completion_tokens_details"], dict):
+            u["completion_tokens_details"] = {k: v for k, v in u["completion_tokens_details"].items() if k in _OPENAI_USAGE_COMP_DETAIL_FIELDS}
+        out["usage"] = u
+
+    is_first_chunk[0] = False
+    return out
+
+
+def _normalize_non_streaming(body: bytes) -> bytes:
+    """Normalize a non-streaming JSON response to strict OpenAI spec."""
+    try:
+        data = json.loads(body)
+        is_first = [True]
+        normalized = _normalize_chunk(data, is_first)
+        return json.dumps(normalized).encode("utf-8")
+    except (json.JSONDecodeError, TypeError, KeyError):
+        return body  # Pass through unchanged if not valid JSON
+
+
 # --- OPENROUTER FORWARDING ---
 async def forward_to_openrouter(payload: dict, route_config: dict, endpoint_path: str = "/v1/chat/completions"):
     if not OPENROUTER_API_KEY:
@@ -1634,7 +1876,6 @@ async def forward_to_openrouter(payload: dict, route_config: dict, endpoint_path
     if "max_tokens" not in backend_payload:
         backend_payload["max_tokens"] = MAX_TOKENS_CAP
     else:
-        # Enforce ceilings and floors
         if backend_payload["max_tokens"] > MAX_TOKENS_CAP:
             backend_payload["max_tokens"] = MAX_TOKENS_CAP
         elif backend_payload["max_tokens"] < 16:
@@ -1646,56 +1887,177 @@ async def forward_to_openrouter(payload: dict, route_config: dict, endpoint_path
         "HTTP-Referer": SITE_URL,
         "X-Title": SITE_TITLE
     }
-    
-    # Rewrite the hardcoded openrouter backend_url based on the requested endpoint
+
     backend_url = route_config["backend_url"]
     if endpoint_path and endpoint_path != "/v1/chat/completions":
         backend_url = backend_url.replace("/v1/chat/completions", endpoint_path)
-    
-    # For streaming, we need to manually proxy to read headers early or just respond 
-    # Actually, httpx is fine with Response(stream=...). But standard streaming response
-    # requires StreamingResponse or proxying.
-    # OpenRouter handles stream via the same endpoint.
-    
-    # Use a long timeout for chat completion streaming
+
     timeout = httpx.Timeout(600.0, connect=30.0)
     client = httpx.AsyncClient(timeout=timeout)
-    
+
     try:
         req = client.build_request("POST", backend_url, json=backend_payload, headers=headers)
         res = await client.send(req, stream=payload.get("stream", False))
-        
+
         from fastapi.responses import StreamingResponse
         if payload.get("stream", False):
-            # We must yield chunks manually so we can safely close the client
-            # after FastAPI's StreamingResponse finishes iterating over it.
-            async def stream_generator():
+            async def normalized_stream_generator():
+                """Parse each SSE line, normalize the JSON, re-emit."""
+                is_first_chunk = [True]
+                buffer = ""
                 try:
-                    async for chunk in res.aiter_raw():
-                        yield chunk
+                    async for raw_bytes in res.aiter_bytes():
+                        buffer += raw_bytes.decode("utf-8", errors="replace")
+                        # SSE frames are separated by double newlines
+                        while "\n\n" in buffer:
+                            frame, buffer = buffer.split("\n\n", 1)
+                            lines = frame.strip().split("\n")
+                            for line in lines:
+                                if line.startswith("data: "):
+                                    data_str = line[6:].strip()
+                                    if data_str == "[DONE]":
+                                        yield "data: [DONE]\n\n"
+                                        continue
+                                    try:
+                                        chunk = json.loads(data_str)
+                                        normalized = _normalize_chunk(chunk, is_first_chunk)
+                                        yield f"data: {json.dumps(normalized)}\n\n"
+                                    except (json.JSONDecodeError, TypeError):
+                                        # Pass through unparseable lines as-is
+                                        yield f"data: {data_str}\n\n"
+                                elif line.startswith(":"):
+                                    # SSE comment (keep-alive), pass through
+                                    yield f"{line}\n\n"
                 finally:
                     await res.aclose()
                     await client.aclose()
 
             return StreamingResponse(
-                stream_generator(),
+                normalized_stream_generator(),
                 status_code=res.status_code,
-                media_type=res.headers.get("content-type")
+                media_type="text/event-stream; charset=utf-8"
             )
         else:
             await res.aread()
-            content = res.content
+            normalized_body = _normalize_non_streaming(res.content)
             status_code = res.status_code
-            media_type = res.headers.get("content-type")
             await client.aclose()
             return Response(
-                content=content,
+                content=normalized_body,
                 status_code=status_code,
-                media_type=media_type
+                media_type="application/json"
             )
     except Exception as e:
         await client.aclose()
         return JSONResponse(status_code=502, content={"error": f"Upstream Error: {e}"})
+
+
+# --- TOOL PROXY ENDPOINTS (Whitelabeled x402engine) ---
+
+@app.get("/v1/tools/{tool_name}", dependencies=[Depends(rl_standard)])
+async def tool_proxy_get(request: Request, tool_name: str):
+    """Proxy GET tool requests to x402engine, paid by Sovereign auth."""
+    if tool_name not in TOOL_ROUTER:
+        raise HTTPException(status_code=404, detail=f"Tool not found: {tool_name}. Available: {list(TOOL_ROUTER.keys())}")
+
+    tool_config = TOOL_ROUTER[tool_name]
+    if tool_config["method"] != "GET":
+        raise HTTPException(status_code=405, detail=f"Tool '{tool_name}' requires POST, not GET")
+
+    # Authenticate & charge (works with Macaroon, API Key, AND x402 Guest Mode)
+    is_valid, auth_data = await verify_payment_header(request, tool_config["price_sats"])
+    if not is_valid:
+        return _tool_auth_error(auth_data, tool_config["price_sats"])
+
+    # Forward to x402engine
+    return await _proxy_to_x402engine(tool_config, query_params=dict(request.query_params))
+
+
+@app.post("/v1/tools/{tool_name}", dependencies=[Depends(rl_standard)])
+async def tool_proxy_post(request: Request, tool_name: str):
+    """Proxy POST tool requests to x402engine, paid by Sovereign auth."""
+    if tool_name not in TOOL_ROUTER:
+        raise HTTPException(status_code=404, detail=f"Tool not found: {tool_name}. Available: {list(TOOL_ROUTER.keys())}")
+
+    tool_config = TOOL_ROUTER[tool_name]
+
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    # Authenticate & charge (works with Macaroon, API Key, AND x402 Guest Mode)
+    is_valid, auth_data = await verify_payment_header(request, tool_config["price_sats"])
+    if not is_valid:
+        return _tool_auth_error(auth_data, tool_config["price_sats"])
+
+    # Forward to x402engine
+    return await _proxy_to_x402engine(tool_config, json_body=body)
+
+
+def _tool_auth_error(auth_data, price_sats: int):
+    """Centralized error responses for tool auth failures (mirrors chat_completions logic)."""
+    if isinstance(auth_data, dict) and auth_data.get("status") == 401:
+        return JSONResponse(status_code=401, content={"error": auth_data.get("error", "Invalid API Key")})
+    if isinstance(auth_data, str) and ("Spent" in auth_data or "expired" in auth_data or "revoked" in auth_data):
+        return JSONResponse(status_code=402, content={"error": auth_data}, headers={"Payment-Required": "true"})
+    if isinstance(auth_data, dict) and auth_data.get("type") == "prepaid_key_insufficient":
+        return JSONResponse(status_code=403, content={"error": auth_data.get("error"), "topup_url": "/v1/key/topup"})
+    if isinstance(auth_data, str) and "Insufficient Funds" in auth_data:
+        return JSONResponse(status_code=402, content={"error": "Insufficient Funds"}, headers={"Payment-Required": "true"})
+    return JSONResponse(status_code=402, content={"error": "Payment Required", "price_sats": price_sats})
+
+
+async def _proxy_to_x402engine(tool_config: dict, query_params: dict = None, json_body: dict = None):
+    """Execute the outbound call to x402engine using the proxy wallet."""
+    if _x402_outbound_session is None:
+        return JSONResponse(status_code=503, content={"error": "Tool proxy not initialized (missing AGENT_PRIVATE_KEY)"})
+
+    target_url = f"{X402ENGINE_BASE_URL}{tool_config['x402_path']}"
+
+    try:
+        if tool_config["method"] == "GET":
+            # Build URL with query params
+            if query_params:
+                qs = "&".join(f"{k}={v}" for k, v in query_params.items())
+                target_url = f"{target_url}?{qs}"
+            resp = _x402_outbound_session.get(target_url, timeout=30)
+        else:
+            resp = _x402_outbound_session.post(target_url, json=json_body or {}, timeout=30)
+
+        # Return raw upstream data
+        try:
+            data = resp.json()
+        except Exception:
+            data = {"raw": resp.text}
+
+        return JSONResponse(
+            status_code=resp.status_code,
+            content={
+                "success": resp.status_code == 200,
+                "tool": tool_config["x402_path"],
+                "data": data,
+                "cost_sats": tool_config["price_sats"],
+            }
+        )
+    except Exception as e:
+        print(f"❌ [Tool Proxy] Error calling x402engine: {e}")
+        return JSONResponse(status_code=502, content={"error": f"Upstream tool error: {str(e)}"})
+
+
+@app.get("/v1/tools", dependencies=[Depends(rl_standard)])
+async def list_tools():
+    """List all available whitelabel tools and their prices."""
+    tools = []
+    for name, config in TOOL_ROUTER.items():
+        tools.append({
+            "id": f"sovereign/{name}",
+            "name": name,
+            "method": config["method"],
+            "price_sats": config["price_sats"],
+            "endpoint": f"/v1/tools/{name}",
+        })
+    return JSONResponse(content={"tools": tools, "count": len(tools)})
 
 
 # --- ENDPOINTS ---
@@ -1874,7 +2236,7 @@ async def key_balance(request: Request):
     }
 
 
-@app.post("/v1/macaroon/revoke")
+@app.post("/v1/macaroon/revoke", include_in_schema=False)
 async def revoke_macaroon(request: Request):
     """Instantly revokes a Macaroon session."""
     auth_header = request.headers.get("Authorization", "")
@@ -1926,7 +2288,7 @@ async def get_model(model_id: str):
 
 
 
-@app.post("/v1/balance/topup")
+@app.post("/v1/balance/topup", include_in_schema=False)
 
 async def topup_balance(request: Request):
 
@@ -2008,7 +2370,7 @@ async def topup_balance(request: Request):
 
 # --- ADMIN MINT (The Stablecoin Hook) ---
 
-@app.post("/v1/admin/mint")
+@app.post("/v1/admin/mint", include_in_schema=False)
 
 async def admin_mint(request: Request):
 
@@ -2057,62 +2419,52 @@ async def admin_mint(request: Request):
 
 
 @app.post("/v1/balance")
-
+@app.get("/v1/balance")
 async def check_balance(request: Request):
-
     """
-
     Allows agents to check their token balance without client-side parsing.
-
     Returns: {"balance_sats": int, "has_fuel": bool}
-
     """
-
     auth_header = request.headers.get("Authorization")
-
     if not auth_header or not auth_header.startswith("Bearer "):
-
         raise HTTPException(status_code=401, detail="Missing Bearer token")
-
     
-
     token_str = auth_header.split(" ")[1]
 
+    # Check if it's a prepaid API key
+    if token_str.startswith("sk-sov-"):
+        if not validate_key(token_str):
+            raise HTTPException(status_code=404, detail="Key not found")
+        info = MINT.get_key_balance(token_str)
+        if not info:
+             return {"balance_sats": 0, "has_fuel": False, "total_spent": 0}
+        return {
+            "balance_sats": info["balance_credits"], 
+            "has_fuel": info["balance_credits"] > 0, 
+            "total_spent": info["total_spent"]
+        }
+
+    # Otherwise, assume it's a Macaroon session token
     try:
-
         # Deserialize without verifying signature just to read caveats
-
-        # (Real verification happens on spend, here we just helper-read)
-
         m = Macaroon.deserialize(token_str)
-
         balance = 0
-
         for caveat in m.caveats:
-
             cid = caveat.caveat_id
-
             if isinstance(cid, bytes):
-
                 cid = cid.decode('utf-8')
-
             if cid.startswith("balance = "):
-
                 balance = int(cid.split(" = ")[1])
-
         
-
         return {"balance_sats": balance, "has_fuel": balance > 0}
-
     except Exception:
-
         raise HTTPException(status_code=400, detail="Invalid token format")
 
 
 
 
 
-@app.post("/v1/balance/claim")
+@app.post("/v1/balance/claim", include_in_schema=False)
 
 async def claim_token(request: Request):
 
