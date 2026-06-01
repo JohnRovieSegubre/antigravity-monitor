@@ -20,7 +20,8 @@ Write-Host ">>> Starting Deployment to $SERVER_IP..." -ForegroundColor Cyan
 
 # 0. Create remote directory if it doesn't exist
 Write-Host ">>> Ensuring remote directory exists..." -ForegroundColor Yellow
-ssh -i $SSH_KEY $USER@$SERVER_IP "mkdir -p $REMOTE_PATH/sdk"
+ssh -i $SSH_KEY $USER@$SERVER_IP "mkdir -p $REMOTE_PATH/sdk $REMOTE_PATH/landing"
+ssh -i $SSH_KEY $USER@$SERVER_IP "rm -rf $REMOTE_PATH/landing/*" # Clean up to avoid nesting
 
 # 1. Stop the Cloud Server (if running)
 Write-Host ">>> Stopping remote server..." -ForegroundColor Yellow
@@ -37,7 +38,8 @@ $files = @(
     "Dockerfile", 
     "requirements.txt",
     "polygon_watcher.py",
-    "cloud_mint.py"
+    "cloud_mint.py",
+    "llm.txt"
 )
 
 foreach ($file in $files) {
@@ -76,8 +78,10 @@ Write-Host "   - Uploading SDK folder..."
 scp -r -i $SSH_KEY sdk "${USER}@${SERVER_IP}:${REMOTE_PATH}/"
 
 # Upload Landing Page
-Write-Host "   - Uploading Landing page..."
-scp -r -i $SSH_KEY landing "${USER}@${SERVER_IP}:${REMOTE_PATH}/"
+Write-Host "   - Uploading Landing page contents..."
+# Copy contents inside to avoid creating nested /landing/landing
+scp -r -i $SSH_KEY landing/* "${USER}@${SERVER_IP}:${REMOTE_PATH}/landing/"
+ssh -i $SSH_KEY $USER@$SERVER_IP "chmod -R 755 $REMOTE_PATH/landing"
 
 # 3. Rebuild and Restart
 Write-Host ">>> Rebuilding and Starting..." -ForegroundColor Cyan

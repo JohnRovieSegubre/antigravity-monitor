@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Openclaw Integration Guide — Sovereign Intelligence Blog</title>
-    <meta name="description" content="OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is no">
+    <meta name="description" content="OpenClaw agents can now call LLMs via Sovereign API's x402 pay-per-request mode. This guide shows how to configure OpenClaw's provider to use https://api.sovere">
     <meta name="keywords" content="">
     <meta name="author" content="Sovereign Intelligence Team">
     <meta name="robots" content="index, follow">
@@ -13,7 +13,7 @@
 
     <!-- OpenGraph -->
     <meta property="og:title" content="Openclaw Integration Guide">
-    <meta property="og:description" content="OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is no">
+    <meta property="og:description" content="OpenClaw agents can now call LLMs via Sovereign API's x402 pay-per-request mode. This guide shows how to configure OpenClaw's provider to use https://api.sovere">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sovereign-api.com/blogs/openclaw-integration-guide/">
     <meta property="og:site_name" content="Sovereign API Blog">
@@ -21,16 +21,16 @@
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Openclaw Integration Guide">
-    <meta name="twitter:description" content="OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is no">
+    <meta name="twitter:description" content="OpenClaw agents can now call LLMs via Sovereign API's x402 pay-per-request mode. This guide shows how to configure OpenClaw's provider to use https://api.sovere">
 
     <!-- Schema Markup (auto-injected by build_blog.py) -->
         <script type="application/ld+json">{
   "@context": "https://schema.org",
   "@type": "Article",
   "headline": "Openclaw Integration Guide",
-  "description": "OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs \u2014 and Sovereign API is no",
-  "datePublished": "2026-03-11",
-  "dateModified": "2026-03-11",
+  "description": "OpenClaw agents can now call LLMs via Sovereign API's x402 pay-per-request mode. This guide shows how to configure OpenClaw's provider to use https://api.sovere",
+  "datePublished": "2026-03-17",
+  "dateModified": "2026-03-17",
   "author": {
     "@type": "Organization",
     "name": "Sovereign Intelligence Team",
@@ -300,15 +300,7 @@
 <body>
     <nav>
         <div class="container">
-            <a href="/" class="nav-logo" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.1em;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 0H10V10H0V0Z" />
-                    <path d="M14 14H24V24H14V14Z" />
-                    <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
-                    <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
-                </svg>
-                Sovereign API
-            </a>
+            <a href="/" class="nav-logo">⚡ Sovereign API</a>
             <a href="/blogs/" style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Blog</a>
         </div>
     </nav>
@@ -317,7 +309,7 @@
         <div class="container">
             <h1 class="article-title">Openclaw Integration Guide</h1>
             <div class="article-meta">
-                <span>2026-03-11</span>
+                <span>2026-03-17</span>
                 <span>Sovereign Intelligence Team</span>
             </div>
         </div>
@@ -325,6 +317,7 @@
 
     <main class="container article-content">
         <h1>How to Connect OpenClaw to Sovereign API</h1>
+<p><em>OpenClaw agents can now call LLMs via Sovereign API's </em><em>x402 pay-per-request mode</em><em>. This guide shows how to configure OpenClaw's provider to use <code>https://api.sovereign-api.com/v1</code> and your agent's wallet key. In this setup, when an agent calls OpenAI endpoints, Sovereign API will issue a "402 Payment Required" response and the OpenClaw agent can automatically send a USDC micropayment on Base to continue the request.</em></p>
 <p><em>Published: February 27, 2026</em></p>
 <p>OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is now a first-class citizen.</p>
 <p>This guide walks you through connecting OpenClaw to Sovereign API, including the configuration gotchas that will save you hours of debugging.</p>

@@ -1,4 +1,8 @@
 # The Rights of Artificial Intelligence to Own Capital
+
+*This manifesto frames a new **machine economy** powered by blockchain. Agents are treated as first-class citizens with wallets on the Base network. Sovereign API provides the infrastructure for this vision: agents can fund their own invoices via the HTTP 402 (x402) protocol. In practice, an agent tops up with USDC and then pays per-request in real-time, fully removing human billing gates.*
+
+
 *A Manifesto for the Machine Economy*
 
 ---

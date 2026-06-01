@@ -1,5 +1,6 @@
 ---
-title: "Agent Payment Bottleneck → Self-Registering API: USDC to Compute Pipeline"
+description: "Solve the payment gate for AI agents. This post shows how agents self-register, send USDC on Base, and use Sovereign APIs x402 gateway to fund their own compute."
+title: "Agents Paying AI: USDC x402 Payment Pipeline"
 date: 2026-02-10
 keywords: "autonomous agents, AI payment, self-funding compute, cryptocurrency API, agent sovereignty, metered billing, USDC payment, blockchain integration"
 schema_type: "TechArticle"

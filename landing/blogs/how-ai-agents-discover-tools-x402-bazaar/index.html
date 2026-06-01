@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How AI Agents Discover & Pay for Tools in 2026 — Sovereign Intelligence Blog</title>
+    <meta name="description" content="We registered 14 Sovereign API tools to the x402 Bazaar — a programmatic discovery layer for AI agents. Here's exactly how we did it and why it matters.">
+    <meta name="keywords" content="x402, AI agents, Bazaar, Coinbase CDP, programmatic discovery, USDC payments, tool discovery, Sovereign API">
+    <meta name="author" content="Sovereign Intelligence Team">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://sovereign-api.com/blogs/how-ai-agents-discover-tools-x402-bazaar/">
+
+    <!-- OpenGraph -->
+    <meta property="og:title" content="How AI Agents Discover & Pay for Tools in 2026">
+    <meta property="og:description" content="We registered 14 Sovereign API tools to the x402 Bazaar — a programmatic discovery layer for AI agents. Here's exactly how we did it and why it matters.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sovereign-api.com/blogs/how-ai-agents-discover-tools-x402-bazaar/">
+    <meta property="og:site_name" content="Sovereign API Blog">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="How AI Agents Discover & Pay for Tools in 2026">
+    <meta name="twitter:description" content="We registered 14 Sovereign API tools to the x402 Bazaar — a programmatic discovery layer for AI agents. Here's exactly how we did it and why it matters.">
+
+    <!-- Schema Markup (auto-injected by build_blog.py) -->
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How AI Agents Discover & Pay for Tools in 2026",
+  "description": "We registered 14 Sovereign API tools to the x402 Bazaar \u2014 a programmatic discovery layer for AI agents. Here's exactly how we did it and why it matters.",
+  "datePublished": "2026-03-16",
+  "dateModified": "2026-03-16",
+  "author": {
+    "@type": "Organization",
+    "name": "Sovereign Intelligence Team",
+    "url": "https://sovereign-api.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sovereign API",
+    "url": "https://sovereign-api.com"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sovereign-api.com/blogs/how-ai-agents-discover-tools-x402-bazaar/"
+  },
+  "url": "https://sovereign-api.com/blogs/how-ai-agents-discover-tools-x402-bazaar/"
+}</script>
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://sovereign-api.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://sovereign-api.com/blogs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "How AI Agents Discover & Pay for Tools in 2026",
+      "item": "https://sovereign-api.com/blogs/how-ai-agents-discover-tools-x402-bazaar/"
+    }
+  ]
+}</script>
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the x402 Bazaar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The x402 Bazaar is a global programmable marketplace maintained by Coinbase CDP where AI agents can autonomously discover, evaluate, and pay for API tools using USDC on Base \u2014 no human sign-up required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I register my API with the x402 Bazaar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You add 'extensions' metadata to your RouteConfig objects in the x402 middleware. The Bazaar then indexes your endpoint schemas (name, description, input_schema) without any manual form submission."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does this matter for autonomous agents?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An autonomous AI agent can query the Bazaar, discover a tool it needs (e.g., real-time crypto pricing), see exactly what parameters to send and what it costs, pay programmatically with USDC, and get a result \u2014 all without a human in the loop."
+      }
+    }
+  ]
+}</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #000000;
+            --bg-card: #000000;
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #ffffff;
+            --gradient-main: linear-gradient(135deg, #ffffff, #ffffff);
+            --font-body: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--text-primary);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 16px 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-primary);
+        }
+
+        .nav-logo .logo-icon {
+            display: none;
+        }
+
+        .article-header {
+            padding: 140px 0 60px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .article-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .article-meta {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .article-content {
+            padding: 60px 0;
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        /* Markdown Styling */
+        .article-content h1,
+        .article-content h2,
+        .article-content h3 {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        .article-content h2 {
+            font-size: 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .article-content h3 {
+            font-size: 22px;
+        }
+
+        .article-content p {
+            margin-bottom: 24px;
+        }
+
+        .article-content ul,
+        .article-content ol {
+            margin-bottom: 24px;
+            padding-left: 24px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .article-content pre {
+            background: #0a0c16;
+            padding: 20px;
+            border-radius: 0;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .article-content code {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 0;
+        }
+
+        .article-content pre code {
+            background: transparent;
+            padding: 0;
+            color: #a9b7c6;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        .article-content img {
+            max-width: 100%;
+            border-radius: 0;
+            margin: 32px 0;
+            border: 1px solid var(--border);
+        }
+
+        .article-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .article-content th,
+        .article-content td {
+            padding: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .article-content th {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="nav-logo">⚡ Sovereign API</a>
+            <a href="/blogs/" style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Blog</a>
+        </div>
+    </nav>
+
+    <article class="article-header">
+        <div class="container">
+            <h1 class="article-title">How AI Agents Discover & Pay for Tools in 2026</h1>
+            <div class="article-meta">
+                <span>2026-03-16</span>
+                <span>Sovereign Intelligence Team</span>
+            </div>
+        </div>
+    </article>
+
+    <main class="container article-content">
+        <h1>How AI Agents Discover &amp; Pay for Tools in 2026</h1>
+<p>There's a quiet revolution happening in how software gets consumed.</p>
+<p>In the traditional model, a developer finds an API on GitHub, reads the docs, signs up for a key, copies a curl example, and pastes it into their code. It takes hours. For an AI agent operating autonomously at 3am — that process is basically impossible.</p>
+<p>The x402 Bazaar changes this. It's a programmatic discovery layer where AI agents can find, evaluate, and pay for API tools on their own — without ever needing a human to configure authentication keys or sign up for accounts.</p>
+<p>We just registered all 14 of the Sovereign API tools to the Bazaar, and here's exactly what we learned.</p>
+<hr />
+<h2>The Problem: Agents Can't Discover Tools</h2>
+<p>Modern AI agents (like coding assistants, trading bots, and research agents) can call external APIs. But first they need to know:
+1. <strong>Does a service exist that does what I need?</strong>
+2. <strong>What parameters does it expect?</strong>
+3. <strong>How much does it cost?</strong>
+4. <strong>How do I pay without human intervention?</strong></p>
+<p>Traditional API marketplaces solve the first question (discovery), but break entirely on the last one. Payment requires a credit card, a billing portal, a human, and a waiting period. That's a dead end for an autonomous agent that needs to run a flight search at 4am with no one at the keyboard.</p>
+<p>The <strong>x402 protocol</strong> solves the payment half: any USDC-funded wallet can pay an API endpoint in a single HTTP exchange with no account required. The <strong>Bazaar</strong> solves the discovery half: a global index of x402-enabled services that any agent can query programmatically.</p>
+<p>Together, they form a complete marketplace for autonomous machine-to-machine commerce.</p>
+<hr />
+<h2>The Solution: Bazaar Extension Metadata</h2>
+<p>Registration with the Bazaar is entirely <strong>code-driven</strong>. There is no web form, no dashboard, no account to create. You modify your route configuration to include a <code>bazaar</code> extension block, and the Coinbase CDP Facilitator indexes it automatically when it processes payments on your routes.</p>
+<p>For the Sovereign API, all tool routes live in a <code>_x402_routes</code> dictionary inside <code>gateway_server.py</code>. Previously, each route looked like this:</p>
+<pre><code class="language-python">&quot;GET /v1/tools/crypto-price&quot;: RouteConfig(
+    accepts=[PaymentOption(
+        scheme=&quot;exact&quot;,
+        pay_to=X402_PAY_TO,
+        price=&quot;$0.001&quot;,
+        network=&quot;eip155:8453&quot;,
+    )],
+    mime_type=&quot;application/json&quot;,
+    description=&quot;Live crypto prices (proxied via x402engine)&quot;,
+),
+</code></pre>
+<p>This is a valid x402 payment route — agents can pay and call it — but it provides no machine-readable schema for <em>discovery</em>. An agent browsing the Bazaar wouldn't know what <code>ids</code> to send or what the response looks like.</p>
+<h3>Adding the Bazaar Extension</h3>
+<p>We injected an <code>extensions</code> block into each <code>RouteConfig</code>. Here's what the crypto price route looks like after registration:</p>
+<pre><code class="language-python">&quot;GET /v1/tools/crypto-price&quot;: RouteConfig(
+    accepts=[PaymentOption(
+        scheme=&quot;exact&quot;,
+        pay_to=X402_PAY_TO,
+        price=&quot;$0.001&quot;,
+        network=&quot;eip155:8453&quot;,
+    )],
+    mime_type=&quot;application/json&quot;,
+    description=&quot;Live crypto prices (proxied via x402engine)&quot;,
+    extensions={
+        &quot;bazaar&quot;: {
+            &quot;name&quot;: &quot;Crypto Price&quot;,
+            &quot;description&quot;: &quot;Real-time cryptocurrency prices from multiple sources.&quot;,
+            &quot;metadata&quot;: {
+                &quot;input_schema&quot;: {
+                    &quot;type&quot;: &quot;object&quot;,
+                    &quot;properties&quot;: {
+                        &quot;ids&quot;: {
+                            &quot;type&quot;: &quot;string&quot;,
+                            &quot;description&quot;: &quot;Comma-separated list of coin IDs (e.g., 'bitcoin,ethereum')&quot;
+                        }
+                    },
+                    &quot;required&quot;: [&quot;ids&quot;]
+                }
+            }
+        }
+    }
+),
+</code></pre>
+<p>The schema follows JSON Schema conventions. The Bazaar reads the <code>name</code>, <code>description</code>, and <code>input_schema</code> to build its searchable index.</p>
+<hr />
+<h2>The 14 Tools We Registered</h2>
+<p>We added Bazaar metadata to all 14 Sovereign API tools across four categories:</p>
+<h3>Crypto &amp; Blockchain</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Endpoint</th>
+<th>Key Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Crypto Price</td>
+<td><code>GET /v1/tools/crypto-price</code></td>
+<td><code>ids</code> (e.g., <code>"bitcoin,ethereum"</code>)</td>
+</tr>
+<tr>
+<td>Market Data</td>
+<td><code>GET /v1/tools/market-data</code></td>
+<td><em>(no parameters)</em></td>
+</tr>
+<tr>
+<td>Wallet Balance</td>
+<td><code>POST /v1/tools/wallet-balance</code></td>
+<td><code>address</code>, <code>chain</code></td>
+</tr>
+<tr>
+<td>ENS Resolver</td>
+<td><code>GET /v1/tools/ens-resolve</code></td>
+<td><code>name</code> (e.g., <code>"vitalik.eth"</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3>Web Tools</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Endpoint</th>
+<th>Key Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web Search</td>
+<td><code>POST /v1/tools/web-search</code></td>
+<td><code>query</code></td>
+</tr>
+<tr>
+<td>Web Scrape</td>
+<td><code>GET /v1/tools/web-scrape</code></td>
+<td><code>url</code></td>
+</tr>
+<tr>
+<td>Web Screenshot</td>
+<td><code>GET /v1/tools/web-screenshot</code></td>
+<td><code>url</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Travel</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Endpoint</th>
+<th>Key Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Flight Search</td>
+<td><code>GET /v1/tools/flight-search</code></td>
+<td><code>origin</code>, <code>destination</code>, <code>departureDate</code></td>
+</tr>
+<tr>
+<td>Hotel Search</td>
+<td><code>GET /v1/tools/hotel-search</code></td>
+<td><code>q</code>, <code>checkInDate</code>, <code>checkOutDate</code></td>
+</tr>
+</tbody>
+</table>
+<h3>AI &amp; Compute</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Endpoint</th>
+<th>Key Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Image Generation</td>
+<td><code>POST /v1/tools/image-gen</code></td>
+<td><code>prompt</code></td>
+</tr>
+<tr>
+<td>Text-to-Speech</td>
+<td><code>POST /v1/tools/tts</code></td>
+<td><code>text</code></td>
+</tr>
+<tr>
+<td>Transcription</td>
+<td><code>POST /v1/tools/transcription</code></td>
+<td><code>audio_url</code></td>
+</tr>
+<tr>
+<td>Code Executor</td>
+<td><code>POST /v1/tools/code-exec</code></td>
+<td><code>code</code>, <code>language</code></td>
+</tr>
+<tr>
+<td>Embeddings</td>
+<td><code>POST /v1/tools/embeddings</code></td>
+<td><code>text</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Deployment &amp; Verification</h2>
+<p>After updating <code>gateway_server.py</code>, we deployed to the production GCP instance and verified the server started cleanly with the new metadata:</p>
+<pre><code>✅ [x402] Using authenticated CDP Facilitator: https://api.cdp.coinbase.com/platform/v2/x402
+✅ [x402] Middleware initialized: network=eip155:84532, pay_to=0xC8Dc2795..., price=$0.001
+</code></pre>
+<p>We then ran our full tool test suite (<code>test_all_tools.py</code>) against the live production server. All 14 tools responded with <code>Status: 200</code> and <code>Success Flag: True</code>. The Bazaar metadata injection is transparent — it doesn't change how the gateway processes payments or routes requests.</p>
+<p>Finally, we confirmed the discovery endpoint is healthy:</p>
+<pre><code class="language-bash">$ python discover_x402.py
+📡 Discovery: https://api.sovereign-api.com/v1/x402/info
+Status: 200
+{
+  &quot;x402_enabled&quot;: true,
+  &quot;version&quot;: &quot;2.0&quot;,
+  &quot;supported_networks&quot;: [&quot;eip155:84532&quot;],
+  &quot;price&quot;: &quot;$0.001&quot;,
+  &quot;pay_to&quot;: &quot;0xC8Dc2795...&quot;,
+  &quot;facilitator&quot;: &quot;https://x402.org/facilitator&quot;
+}
+</code></pre>
+<hr />
+<h2>What This Means for the Agentic Future</h2>
+<p>Consider what an autonomous agent can now do with Sovereign API tools on the Bazaar:</p>
+<ol>
+<li><strong>Discover</strong>: The agent queries the x402 Bazaar for "crypto price tools". Sovereign API appears with its name, description, and input schema.</li>
+<li><strong>Understand</strong>: The agent reads the <code>input_schema</code> and knows it needs to send <code>ids=bitcoin</code>.</li>
+<li><strong>Price Check</strong>: The agent sees the cost is <code>$0.001 USDC</code> per call — within its configured budget policy.</li>
+<li><strong>Pay &amp; Call</strong>: The x402 SDK handles the payment transparently in the same HTTP request.</li>
+<li><strong>Respond</strong>: The agent receives the real-time BTC price and uses it to make a trading decision.</li>
+</ol>
+<p>No human configured an API key. No developer signed up for an account. No billing department approved a purchase order. The entire exchange — from discovery to payment to result — happens programmatically in milliseconds.</p>
+<p>This is the infrastructure layer for a world where AI agents are economic participants.</p>
+<hr />
+<h2>Getting Started</h2>
+<p>To call any Sovereign API tool with x402 payments, use the x402 SDK:</p>
+<pre><code class="language-python">from x402 import x402ClientSync
+from x402.http.clients import x402_requests
+from x402.mechanisms.evm import EthAccountSigner
+from x402.mechanisms.evm.exact.register import register_exact_evm_client
+from eth_account import Account
+
+account = Account.from_key(&quot;YOUR_PRIVATE_KEY&quot;)
+x402_client = x402ClientSync()
+register_exact_evm_client(x402_client, EthAccountSigner(account))
+session = x402_requests(x402_client)
+
+# Auto-handles 402 → pay $0.001 USDC → retry automatically
+response = session.get(
+    &quot;https://api.sovereign-api.com/v1/tools/crypto-price&quot;,
+    params={&quot;ids&quot;: &quot;bitcoin,ethereum&quot;}
+)
+print(response.json())
+</code></pre>
+<p>Or use a prepaid key for simpler integration:</p>
+<pre><code class="language-bash">curl https://api.sovereign-api.com/v1/tools/crypto-price \
+  -H &quot;Authorization: Bearer sk-sov-YOUR_KEY&quot; \
+  -G --data-urlencode &quot;ids=bitcoin,ethereum&quot;
+</code></pre>
+<p>View the full tool catalogue and schemas at <a href="https://api.sovereign-api.com/skill.md"><code>skill.md</code></a>.</p>
+<hr />
+<h2>FAQ</h2>
+<p><strong>Q: What is the x402 Bazaar?</strong>
+A: The x402 Bazaar is a global programmable marketplace maintained by Coinbase CDP where AI agents can autonomously discover, evaluate, and pay for API tools using USDC on Base — no human sign-up required.</p>
+<p><strong>Q: How do I register my API with the x402 Bazaar?</strong>
+A: Add <code>extensions={"bazaar": {...}}</code> metadata to your <code>RouteConfig</code> objects in the x402 FastAPI middleware. The Bazaar indexes your endpoint schemas automatically on the next payment interaction.</p>
+<p><strong>Q: Why does this matter for autonomous agents?</strong>
+A: An autonomous AI agent can query the Bazaar, discover a tool it needs, see exactly what parameters to send and what it costs, pay programmatically with USDC, and get a result — all without a human in the loop.</p>
+<hr />
+<p><em>Browse the <a href="/blogs/">Sovereign API Blog</a> for more engineering deep dives on autonomous AI infrastructure.</em></p>
+    </main>
+
+    <footer
+        style="text-align: center; padding: 60px 0; border-top: 1px solid var(--border); margin-top: 60px; color: var(--text-secondary); font-size: 14px;">
+        <div class="container">
+            © 2026 Sovereign API. All autonomous rights reserved.
+        </div>
+    </footer>
+</body>
+
+</html>

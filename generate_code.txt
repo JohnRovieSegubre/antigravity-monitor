@@ -1,0 +1,157 @@
+            "GET /v1/tools/crypto-price": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Live crypto prices (proxied via x402engine)",
+            ),
+            "GET /v1/tools/web-scrape": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Web page scraping (proxied via x402engine)",
+            ),
+            "POST /v1/tools/web-search": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Web search (proxied via x402engine)",
+            ),
+            "GET /v1/tools/web-screenshot": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Web page screenshot (proxied via x402engine)",
+            ),
+            "POST /v1/tools/image-gen": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="AI image generation (proxied via x402engine)",
+            ),
+            "POST /v1/tools/tts": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.005",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Text-to-speech (proxied via x402engine)",
+            ),
+            "POST /v1/tools/transcription": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.005",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Audio transcription (proxied via x402engine)",
+            ),
+            "POST /v1/tools/code-exec": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Sandboxed code execution (proxied via x402engine)",
+            ),
+            "GET /v1/tools/market-data": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Market data (proxied via x402engine)",
+            ),
+            "POST /v1/tools/wallet-balance": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Wallet balances (proxied via x402engine)",
+            ),
+            "GET /v1/tools/ens-resolve": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="ENS resolution (proxied via x402engine)",
+            ),
+            "GET /v1/tools/flight-search": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Flight search (proxied via x402engine)",
+            ),
+            "GET /v1/tools/hotel-search": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price="$0.002",
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Hotel search (proxied via x402engine)",
+            ),
+            "POST /v1/tools/embeddings": RouteConfig(
+                accepts=[PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_PAY_TO,
+                    price=X402_PRICE,
+                    network=X402_NETWORK,
+                )],
+                mime_type="application/json",
+                description="Text embeddings (proxied via x402engine)",
+            ),
+
+=====
+
+    "crypto-price": {"x402_path": "/api/crypto/price", "price_sats": 50, "method": "GET"},
+    "web-scrape": {"x402_path": "/api/web/scrape", "price_sats": 100, "method": "GET"},
+    "web-search": {"x402_path": "/api/search/web", "price_sats": 100, "method": "POST"},
+    "web-screenshot": {"x402_path": "/api/web/screenshot", "price_sats": 100, "method": "GET"},
+    "image-gen": {"x402_path": "/api/image/fast", "price_sats": 500, "method": "POST"},
+    "tts": {"x402_path": "/api/tts/openai", "price_sats": 250, "method": "POST"},
+    "transcription": {"x402_path": "/api/transcribe", "price_sats": 250, "method": "POST"},
+    "code-exec": {"x402_path": "/api/code/run", "price_sats": 100, "method": "POST"},
+    "market-data": {"x402_path": "/api/crypto/markets", "price_sats": 50, "method": "GET"},
+    "wallet-balance": {"x402_path": "/api/wallet/balances", "price_sats": 50, "method": "POST"},
+    "ens-resolve": {"x402_path": "/api/ens/resolve", "price_sats": 50, "method": "GET"},
+    "flight-search": {"x402_path": "/api/travel/flights", "price_sats": 100, "method": "GET"},
+    "hotel-search": {"x402_path": "/api/travel/hotels", "price_sats": 100, "method": "GET"},
+    "embeddings": {"x402_path": "/api/embeddings", "price_sats": 50, "method": "POST"},

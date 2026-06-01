@@ -1,5 +1,6 @@
 ---
-title: "Macaroon Tokens: Why AI Agents Need Cryptographic Bearer Tokens, Not API Keys"
+description: "How sovereign-api uses self-decrementing macaroon tokens to meter AI agent usage. No database lookups - each request spends crypto-encoded credits."
+title: "Cryptographic Tokens for AI Billing: Macaroons vs API Keys"
 date: 2026-02-10
 keywords: "macaroon tokens, bearer tokens, AI authentication, decentralized credentials, agent security, cryptographic tokens, self-decrementing balance"
 ---

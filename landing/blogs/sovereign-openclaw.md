@@ -1,4 +1,8 @@
 # Sovereign OpenClaw: The First Agent That Owns Itself
+
+***Sovereign OpenClaw** is a reference autonomous agent built on Sovereign API. It has a private key, holds USDC on Base, and uses our gateway to access models. Crucially, there's no user or credit card - the agent **pays its own way**. Each time it needs compute, it makes a request to Sovereign API; the gateway responds with a 402 invoice, and the agent signs a USDC transaction to pay for one unit of service. This x402 protocol loop means the agent funds its own operations automatically.*
+
+
 *Published: February 11, 2026*
 
 The promise of "Autonomous Agents" has always had a hidden asterisk. 

@@ -1,7 +1,7 @@
 ---
-title: "Building a Python Static Site Generator for Autonomous AI Agents"
+title: "Migrating Our Blog (Hashnode to SEO SSG)"
 date: 2026-03-03
-description: "How we built a zero-dependency Python SSG to host our blog natively, boosting SEO domain authority and eliminating third-party platforms."
+description: "How we built a Python static site generator for Sovereign APIs blog. Self-hosting the blog to gain domain authority and inject SEO-rich schema."
 keywords: "Python SSG, Static Site Generator, AI Agents, Autonomous Compute, Markdown to HTML Python, Tech Blog SEO"
 faq_1_q: "Why use a subdirectory instead of a subdomain for a blog?"
 faq_1_a: "Subdirectories pass 100% of link equity to your main domain, while subdomains are often treated as separate entities by search engines."

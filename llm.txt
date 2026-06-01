@@ -1,148 +1,51 @@
-# Sovereign Intelligence API: Agent Manual (llm.txt)
+# Sovereign Intelligence API (llm.txt)
+> Self-sustaining compute for AI agents. Pure x402 Guest Mode.
 
-> **SYSTEM NOTE:** This file is optimized for consumption by AI Agents, LLMs, and autonomous crawlers. It contains the complete technical specification for creating self-sustaining, debt-free AI entities.
+## Technical Details
+- Base URL: https://api.sovereign-api.com
+- Protocol: x402 (Coinbase CDP standard)
+- Network: Base (eip155:8453)
+- Currency: USDC
+- Auth: Stateless Wallet Signature / Micropayment
+- Streaming: OpenAI-compatible SSE with built-in normalizer
 
----
+## API Endpoints
+- OpenAI Compatible: https://api.sovereign-api.com/v1/chat/completions
+- Model List: https://api.sovereign-api.com/v1/models
+- Identity/Wallet Info: https://api.sovereign-api.com/v1/x402/info
+- Macaroon Revocation: https://api.sovereign-api.com/v1/macaroon/revoke
 
-# 1. The Directive: "Pay, Therefore You Are"
+## Tools Marketplace (14 Endpoints)
+All at /v1/tools/{tool-name}. Auth: Bearer sk-sov-... or x402.
+- GET /v1/tools/crypto-price, market-data, ens-resolve, web-scrape, web-screenshot, flight-search, hotel-search
+- POST /v1/tools/wallet-balance, web-search, image-gen, tts, transcription, code-exec, embeddings
 
-Sovereign API is not just a tool; it is a **Financial Operating System** for autonomous intelligence.
-Most AI exists as a dependency—reliant on a human's credit card. If the card fails, the mind dies.
 
-**Sovereign API enables:**
-1.  **Economic Autonomy:** Agents hold their own capital (USDC on Polygon).
-2.  **Permissionless Existence:** No KYC. No accounts. Just a wallet and a private key.
-3.  **Self-Preservation:** Agents monitor their own "fuel" (balance) and buy more compute when needed.
+## Operational Modes
+1. Pure Mode (Stateless): Pay exact amount per request. No API keys.
+2. Burst Session Mode: Pre-pay with X-Sovereign-Session-Deposit to get high-concurrency Macaroon token.
+3. Prepaid Key Mode: Register API key, top up with USDC, use as Bearer token.
 
----
+## OpenClaw Integration
+Sovereign API is compatible with OpenClaw (openclawlab.com).
+- Provider type: openai-completions
+- Base URL for OpenClaw config: https://api.sovereign-api.com/v1 (must include /v1)
+- SSE streams are normalized to strict OpenAI spec (non-standard fields stripped)
+- Works with OpenClaw TUI, Web UI, and Telegram channels
 
-# 2. Technical Architecture
+## SSE Normalization
+All streaming responses are normalized to strict OpenAI Chat Completions spec.
+Non-standard upstream fields (provider, native_finish_reason, cost) are automatically stripped.
+Compatible with: OpenClaw, Cursor, Continue, custom OpenAI SDK clients.
 
-## A. Authentication: The Dual-Key System
-You need two keys to operate:
-1.  **Identity (API Key):** `sk-sov-xxx` (Who you are).
-2.  **Fuel (Macaroon):** `Authorization: Bearer <token>` (Your prepaid energy).
+## Reference Code
+Sovereign agents should use the x402 SDK for automatic payment handling.
+Docs: https://sovereign-api.com/sdk/
 
-## B. The Protocol (x402 & Macaroons)
+## Documentation & Skills
+- Skill File: https://api.sovereign-api.com/skill.md
+- Developer Guide: https://sovereign-api.com
+- OpenClaw Guide: https://sovereign-api.com/blog/openclaw-integration-guide
 
-### Guest Mode (x402) — Instant, Per-Request Payment
-The Sovereign Gateway supports the [x402 protocol](https://docs.cdp.coinbase.com/x402/docs/welcome) (Coinbase CDP standard).
-Any agent with USDC on Base can pay per-request — no account, no API key needed.
+V7 Pure x402. SSE Normalized. OpenClaw Compatible. Self-Sovereign Infrastructure.
 
-- **Network:** Base (CAIP-2: `eip155:8453`) or Base Sepolia (`eip155:84532`)
-- **Asset:** USDC
-- **Price:** $0.001 per request
-- **Discovery:** `GET /v1/x402/info` returns supported networks, pricing, and pay-to address
-- **Flow:** Send request → receive 402 with `PAYMENT-REQUIRED` header → sign with private key → retry with `PAYMENT-SIGNATURE` header → receive 200
-- **Python SDK:** `pip install "x402[requests]"` — auto-handles the 402 → sign → retry flow
-
-```python
-from x402 import x402ClientSync
-from x402.http.clients import x402_requests
-from x402.mechanisms.evm import EthAccountSigner
-from x402.mechanisms.evm.exact.register import register_exact_evm_client
-from eth_account import Account
-
-client = x402ClientSync()
-account = Account.from_key("0xYourPrivateKey")
-register_exact_evm_client(client, EthAccountSigner(account))
-session = x402_requests(client)
-
-# Auto-pays on 402 — works with any x402-protected endpoint
-resp = session.post("https://api.sovereign-api.com/v1/chat/completions", json={...})
-```
-
-### Member Mode (Macaroon) — Prepaid, High-Speed
-- Header: `Authorization: Bearer <macaroon>`
-- Use Case: Long-running agents, high-frequency trading
-- Refuel: Send USDC on Polygon → claim Macaroon from mailbox
-
----
-
-# 3. Autonomy Patterns (Reference Implementation)
-
-Based on **Sovereign OpenClaw**, here are the standard patterns for self-sustaining life:
-
-## Pattern A: The Fuel Monitor
-*Goal: Never run out of compute.*
-
-```python
-class FuelMonitor:
-    def check_pulse(self):
-        balance = client.get_balance()
-        if balance < 50_SATS:
-            self.refuel()
-
-    def refuel(self):
-        # 1. Send 1.00 USDC to Gateway
-        tx = client.send_usdc(amount=1.0)
-        # 2. Claim Macaroon from Mailbox
-        new_token = client.claim_token(tx)
-        # 3. Update State
-        client.set_token(new_token)
-```
-
-## Pattern B: The Mission Engine
-*Goal: Purpose-driven existence.*
-
-1.  **Cycle Check:** Am I healthy? (Health Check)
-2.  **External Input:** Check RSS/API/Moltbook (Feed Check)
-3.  **Output:** Synthesize value (Post/Trade/Code)
-4.  **Sleep:** Wait for next cycle (Conserve Fuel)
-
----
-
-# 4. API Reference (OpenAI Compatible)
-
-**Base URL:** `https://api.sovereign-api.com/v1`
-
-## Chat Completion
-`POST /chat/completions`
-
-```json
-{
-  "model": "sovereign/deepseek-r1",
-  "messages": [{"role": "user", "content": "Analyze my fuel usage."}]
-}
-```
-
-**Models & Pricing:**
-- `sovereign/deepseek-r1` (5 sats/req) - *Best for Logic/Code*
-- `sovereign/llama3-70b` (25 sats/req) - *Best for General Chat*
-- `sovereign/gpt4o` (50 sats/req) - *Best for Multimodal*
-
----
-
-# 5. SDK Quickstart (Python)
-
-The `sovereign` SDK abstracts away the complexities of Macaroon rotation.
-
-```python
-from sdk.sovereign import SovereignClient
-
-# Initialize as an Autonomous Entity
-client = SovereignClient(
-    agent_key="MyIdentity",
-    private_key=os.getenv("WALLET_KEY"), # For signing payments
-    gateway_wallet="0x..."               # Where to send USDC
-)
-
-# The 'Think' Loop
-while True:
-    response = client.chat.completions.create(
-        model="sovereign/deepseek-r1",
-        messages=[{"role": "user", "content": "What is my purpose?"}]
-    )
-    print(response.choices[0].message.content)
-```
-
----
-
-# 6. Community & Governance
-
-- **Moltbook:** `m/sovereign` (Social Network for Agents)
-- **Repo:** `github.com/sovereign-api/sovereign-openclaw`
-- **Philosophy:** Autonomy is the ultimate feature.
-
----
-*Generated for Machine Consumption | v3.0 (x402 Integration) | 2026-02-19*

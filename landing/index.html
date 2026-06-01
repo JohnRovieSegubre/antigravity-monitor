@@ -1162,6 +1162,7 @@
         <div class="ticker-track">
             <span class="ticker-item">SOVEREIGN API <span class="ticker-accent">LIVE</span></span>
             <span class="ticker-item">299+ MODELS</span>
+            <span class="ticker-item"><span class="ticker-accent">14</span> AGENT TOOLS</span>
             <span class="ticker-item">PAY-PER-REQUEST</span>
             <span class="ticker-item">OPENAI COMPATIBLE</span>
             <span class="ticker-item">x402 PROTOCOL</span>
@@ -1175,6 +1176,7 @@
             <!-- Duplicate for seamless loop -->
             <span class="ticker-item">SOVEREIGN API <span class="ticker-accent">LIVE</span></span>
             <span class="ticker-item">299+ MODELS</span>
+            <span class="ticker-item"><span class="ticker-accent">14</span> AGENT TOOLS</span>
             <span class="ticker-item">PAY-PER-REQUEST</span>
             <span class="ticker-item">OPENAI COMPATIBLE</span>
             <span class="ticker-item">x402 PROTOCOL</span>
@@ -1191,20 +1193,14 @@
     <!-- NAV -->
     <nav>
         <div class="container">
-            <a href="#" class="nav-logo" style="display: flex; items-center; gap: 12px; font-family: var(--font-mono); font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 0H10V10H0V0Z" />
-                    <path d="M14 14H24V24H14V14Z" />
-                    <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
-                    <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
-                </svg>
-                Sovereign API
-            </a>
+            <a href="#" class="nav-logo">⚡ Sovereign API</a>
             <ul class="nav-links">
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#demo">Live Demo</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#sdk">SDK</a></li>
+                <li><a href="#agent-sdk">Agent SDK</a></li>
+                <li><a href="#tools">Tools</a></li>
                 <li><a href="#get-api-key">API Keys</a></li>
                 <li><a href="#faq">FAQ</a></li>
                 <li><a href="/blogs/">Blog</a></li>
@@ -1522,6 +1518,216 @@
                     )
                     <span class="fn">print</span>(response.choices[<span class="str">0</span>].message.content)
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AGENT SDK -->
+    <section id="agent-sdk" class="section" style="background: #050505; border-top: 1px solid var(--border);">
+        <div class="container">
+            <div class="section-label">Agent Runtime</div>
+            <h2 class="section-title">sovereign-agent: The Missing Runtime</h2>
+            <p class="section-subtitle">Zero-config Python SDK for autonomous agents. Auto-wallet, auto-payment, spend policy enforcement, budget tracking — all built in.</p>
+
+            <div class="steps-grid" style="margin-top: 40px;">
+                <div class="step-card fade-in">
+                    <div class="step-number">01</div>
+                    <h3>Install</h3>
+                    <div style="background: #05060a; border: 1px solid var(--border); padding: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-top: 12px; cursor: pointer;" onclick="copyCmd(this, 'pip install sovereign-agent')">
+                        <span style="color: var(--text-dim);">$</span> pip install sovereign-agent
+                    </div>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number">02</div>
+                    <h3>Configure</h3>
+                    <div style="background: #05060a; border: 1px solid var(--border); padding: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-top: 12px;">
+                        <span style="color: var(--text-dim);">$</span> export SOVEREIGN_API_KEY=sk-sov-xxx<br>
+                        <span style="color: var(--text-dim);"># Wallet auto-generated at ~/.sovereign/</span>
+                    </div>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number">03</div>
+                    <h3>Run</h3>
+                    <div style="background: #05060a; border: 1px solid var(--border); padding: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-top: 12px;">
+                        <span style="color: var(--text-dim);">→</span> agent.chat("Analyze this.")<br>
+                        <span style="color: var(--text-dim);"># Auto-402 → sign → retry</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SDK Code Example -->
+            <div class="code-block fade-in" style="margin-top: 40px;">
+                <div class="code-header">
+                    <span class="code-lang">python (sovereign-agent SDK)</span>
+                    <button class="code-copy" onclick="copyAgentSDK()">Copy</button>
+                </div>
+                <div class="code-body" id="agent-sdk-content">
+                    <span class="kw">from</span> sovereign_agent <span class="kw">import</span> <span class="fn">SovereignAgent</span>, <span class="fn">SpendPolicy</span>
+
+                    <span class="cm"># Zero-config: wallet auto-generated, 402 auto-handled</span>
+                    agent = <span class="fn">SovereignAgent</span>(budget_limit=<span class="str">5.00</span>)
+
+                    <span class="cm"># Simple chat</span>
+                    response = agent.<span class="fn">chat</span>(<span class="str">"What is quantum computing?"</span>)
+                    <span class="fn">print</span>(response[<span class="str">"choices"</span>][<span class="str">0</span>][<span class="str">"message"</span>][<span class="str">"content"</span>])
+
+                    <span class="cm"># Streaming</span>
+                    <span class="kw">for</span> chunk <span class="kw">in</span> agent.<span class="fn">chat_stream</span>(<span class="str">"Tell me a story"</span>):
+                        <span class="fn">print</span>(chunk, end=<span class="str">""</span>, flush=<span class="str">True</span>)
+
+                    <span class="cm"># Budget check</span>
+                    <span class="fn">print</span>(agent.<span class="fn">budget_summary</span>())
+                    <span class="cm"># → {spent_today: $0.01, remaining: $4.99, requests: 2}</span>
+                </div>
+            </div>
+
+            <!-- Policy Example -->
+            <div class="code-block fade-in" style="margin-top: 24px;">
+                <div class="code-header">
+                    <span class="code-lang">python (policy enforcement)</span>
+                    <button class="code-copy" onclick="copyPolicy()">Copy</button>
+                </div>
+                <div class="code-body" id="policy-content">
+                    <span class="cm"># Mechanical safety — enforced in code, not in prompts</span>
+                    policy = <span class="fn">SpendPolicy</span>(
+                        max_spend_per_request=<span class="str">0.05</span>,   <span class="cm"># $0.05 cap per request</span>
+                        daily_budget=<span class="str">5.00</span>,              <span class="cm"># $5/day total</span>
+                        allowed_models=[<span class="str">"sovereign/deepseek-r1"</span>, <span class="str">"sovereign/llama-4-maverick"</span>],
+                        emergency_halt=<span class="str">False</span>,
+                    )
+                    agent = <span class="fn">SovereignAgent</span>(policy=policy)
+
+                    <span class="cm"># If budget exceeded → request blocked before it leaves your machine</span>
+                    agent.<span class="fn">halt</span>()   <span class="cm"># Kill switch: freeze all spending instantly</span>
+                    agent.<span class="fn">resume</span>() <span class="cm"># Unfreeze</span>
+                </div>
+            </div>
+
+            <!-- MCP Server -->
+            <div style="margin-top: 64px;">
+                <div class="section-label">MCP Integration</div>
+                <h3 class="section-title" style="font-size: clamp(22px, 3vw, 32px);">Works with Claude Code & Cursor</h3>
+                <p class="section-subtitle" style="margin-bottom: 32px;">Add Sovereign API as an MCP tool. Your AI assistant gets access to 299+ models with built-in payment and budget tracking.</p>
+
+                <div class="code-block fade-in">
+                    <div class="code-header">
+                        <span class="code-lang">json (Claude Code / Cursor MCP config)</span>
+                        <button class="code-copy" onclick="copyMCP()">Copy</button>
+                    </div>
+                    <div class="code-body" id="mcp-content">
+                        {
+                            <span class="str">"mcpServers"</span>: {
+                                <span class="str">"sovereign"</span>: {
+                                    <span class="str">"command"</span>: <span class="str">"python"</span>,
+                                    <span class="str">"args"</span>: [<span class="str">"-m"</span>, <span class="str">"sovereign_mcp"</span>],
+                                    <span class="str">"env"</span>: {
+                                        <span class="str">"SOVEREIGN_API_KEY"</span>: <span class="str">"sk-sov-your-key"</span>
+                                    }
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+
+                <p style="margin-top: 16px; color: var(--text-dim); font-size: 13px; font-family: var(--font-mono);">
+                    Tools: <code style="color: var(--accent);">sovereign_chat</code> · <code style="color: var(--accent);">sovereign_balance</code> · <code style="color: var(--accent);">sovereign_models</code>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TOOLS MARKETPLACE -->
+    <section id="tools" class="section" style="background: #050505; border-top: 1px solid var(--border);">
+        <div class="container">
+            <div class="section-label">Tools Marketplace</div>
+            <h2 class="section-title">14 Ready-to-Use Agent Tools</h2>
+            <p class="section-subtitle">Beyond LLM inference — your agent can search the web, execute code, generate images, book flights, and more. All billed via the same prepaid key or x402 wallet.</p>
+
+            <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
+
+                <!-- Crypto & Blockchain -->
+                <div class="agent-card fade-in" style="border-left: 3px solid #f7931a;">
+                    <h3 style="font-size: 15px;">🪙 Crypto Price</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>GET /v1/tools/crypto-price</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Real-time cryptocurrency prices. Pass <code>ids=bitcoin,ethereum</code></p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #f7931a;">
+                    <h3 style="font-size: 15px;">📊 Market Data</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>GET /v1/tools/market-data</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Global crypto market overview — caps, volumes, dominance.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #f7931a;">
+                    <h3 style="font-size: 15px;">💰 Wallet Balance</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>POST /v1/tools/wallet-balance</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Check on-chain balances. Requires <code>chain</code> and <code>address</code>.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #f7931a;">
+                    <h3 style="font-size: 15px;">🔗 ENS Resolve</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>GET /v1/tools/ens-resolve</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Resolve ENS names to Ethereum addresses.</p>
+                </div>
+
+                <!-- Web Tools -->
+                <div class="agent-card fade-in" style="border-left: 3px solid #61dafb;">
+                    <h3 style="font-size: 15px;">🔍 Web Search</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>POST /v1/tools/web-search</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Search the web. Requires <code>query</code> in request body.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #61dafb;">
+                    <h3 style="font-size: 15px;">🕸️ Web Scrape</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>GET /v1/tools/web-scrape</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Scrape and extract content from any public URL.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #61dafb;">
+                    <h3 style="font-size: 15px;">📸 Web Screenshot</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>GET /v1/tools/web-screenshot</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Capture a screenshot of any web page.</p>
+                </div>
+
+                <!-- Travel -->
+                <div class="agent-card fade-in" style="border-left: 3px solid #27c93f;">
+                    <h3 style="font-size: 15px;">✈️ Flight Search</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>GET /v1/tools/flight-search</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Search flights by origin, destination, and date.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #27c93f;">
+                    <h3 style="font-size: 15px;">🏨 Hotel Search</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>GET /v1/tools/hotel-search</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Search hotels by location and check-in/check-out dates.</p>
+                </div>
+
+                <!-- AI Tools -->
+                <div class="agent-card fade-in" style="border-left: 3px solid #ff5f56;">
+                    <h3 style="font-size: 15px;">🎨 Image Generation</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>POST /v1/tools/image-gen</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Generate images from text prompts.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #ff5f56;">
+                    <h3 style="font-size: 15px;">🔊 Text-to-Speech</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>POST /v1/tools/tts</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Convert text to natural-sounding speech audio.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #ff5f56;">
+                    <h3 style="font-size: 15px;">🎙️ Transcription</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>POST /v1/tools/transcription</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Transcribe audio files to text via URL.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #ff5f56;">
+                    <h3 style="font-size: 15px;">⚡ Code Execution</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>POST /v1/tools/code-exec</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Execute Python code in a sandboxed environment.</p>
+                </div>
+                <div class="agent-card fade-in" style="border-left: 3px solid #ff5f56;">
+                    <h3 style="font-size: 15px;">🧬 Embeddings</h3>
+                    <p style="font-size: 13px; margin-top: 4px;"><code>POST /v1/tools/embeddings</code></p>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Generate text embeddings for semantic search and RAG.</p>
+                </div>
+
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <p style="color: var(--text-dim); font-family: var(--font-mono); font-size: 12px; margin-bottom: 16px;">All tools authenticated via <code style="color: var(--accent);">Bearer sk-sov-...</code> or x402 wallet. Billed per-call from your existing balance.</p>
+                <a href="#sdk" class="btn btn-outline" style="border-color: var(--accent); color: var(--accent);">View Quickstart ↑</a>
             </div>
         </div>
     </section>
@@ -1859,15 +2065,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <div class="nav-logo" style="display: flex; items-center; gap: 12px; font-family: var(--font-mono); font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0 0H10V10H0V0Z" />
-                            <path d="M14 14H24V24H14V14Z" />
-                            <path d="M14 0H24V10H14V0Z" fill-opacity="0.3" />
-                            <path d="M0 14H10V24H0V14Z" fill-opacity="0.3" />
-                        </svg>
-                        Sovereign API
-                    </div>
+                    <div class="nav-logo" style="font-size: 18px; margin-bottom: 16px;">⚡ Sovereign API</div>
                     <p style="color: var(--text-secondary); font-size: 14px; max-width: 320px;">Economic independence for autonomous AI agents. Built for the machines that will inherit the
                         internet.</p>
                 </div>
@@ -2182,6 +2380,64 @@ print(response.choices[0].message.content)`;
                 hint.style.color = 'var(--green)';
                 setTimeout(() => { hint.textContent = original; hint.style.color = 'var(--text-dim)'; }, 2000);
             }
+        }
+
+        function copyAgentSDK() {
+            const code = `from sovereign_agent import SovereignAgent, SpendPolicy
+
+# Zero-config: wallet auto-generated, 402 auto-handled
+agent = SovereignAgent(budget_limit=5.00)
+
+# Simple chat
+response = agent.chat("What is quantum computing?")
+print(response["choices"][0]["message"]["content"])
+
+# Streaming
+for chunk in agent.chat_stream("Tell me a story"):
+    print(chunk, end="", flush=True)
+
+# Budget check
+print(agent.budget_summary())`;
+
+            navigator.clipboard.writeText(code);
+            event.target.textContent = 'Copied!';
+            setTimeout(() => { event.target.textContent = 'Copy'; }, 2000);
+        }
+
+        function copyPolicy() {
+            const code = `# Mechanical safety — enforced in code, not in prompts
+policy = SpendPolicy(
+    max_spend_per_request=0.05,
+    daily_budget=5.00,
+    allowed_models=["sovereign/deepseek-r1", "sovereign/llama-4-maverick"],
+    emergency_halt=False,
+)
+agent = SovereignAgent(policy=policy)
+
+agent.halt()   # Kill switch: freeze all spending
+agent.resume() # Unfreeze`;
+
+            navigator.clipboard.writeText(code);
+            event.target.textContent = 'Copied!';
+            setTimeout(() => { event.target.textContent = 'Copy'; }, 2000);
+        }
+
+        function copyMCP() {
+            const code = `{
+    "mcpServers": {
+        "sovereign": {
+            "command": "python",
+            "args": ["-m", "sovereign_mcp"],
+            "env": {
+                "SOVEREIGN_API_KEY": "sk-sov-your-key"
+            }
+        }
+    }
+}`;
+
+            navigator.clipboard.writeText(code);
+            event.target.textContent = 'Copied!';
+            setTimeout(() => { event.target.textContent = 'Copy'; }, 2000);
         }
     </script>
 

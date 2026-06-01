@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Poker Advisor — EV Tracker</title>
+    <meta name="description" content="Real-time poker advisor with EV tracking, hand history, and advanced strategy engine.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                <span class="logo-icon">♠️</span>
+                <h1 id="advisor-title">Antigravity Advisor</h1>
+                <span class="version-badge">v3 · EV Tracker</span>
+            </div>
+            <div class="tourney-info">
+                <div class="info-pill"><span class="label">Pot:</span> <span id="pot">0 BB</span></div>
+                <div class="info-pill"><span class="label">To Call:</span> <span id="to-call">0 BB</span></div>
+                <div class="info-pill connection-status online" id="connection-status">Live Capture Active</div>
+            </div>
+        </header>
+
+        <!-- SESSION STATS BAR -->
+        <div class="session-bar" id="session-bar">
+            <div class="stat-chip">
+                <span class="stat-label">Hands</span>
+                <span class="stat-value" id="stat-hands">0</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-label">P&L</span>
+                <span class="stat-value pnl" id="stat-pnl">0.0 BB</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-label">Win Rate</span>
+                <span class="stat-value" id="stat-winrate">0.0 BB/h</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-label">VPIP</span>
+                <span class="stat-value" id="stat-vpip">0%</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-label">Fold%</span>
+                <span class="stat-value" id="stat-fold">0%</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-label">Best Win</span>
+                <span class="stat-value win" id="stat-best">0 BB</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-label">Worst Loss</span>
+                <span class="stat-value loss" id="stat-worst">0 BB</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- LEFT COLUMN: Action + Strategy -->
+            <div class="action-panel">
+                <h2>Recommended Action</h2>
+                <div class="action-card fold" id="recommended-action">
+                    <h1 class="action-text">WAITING</h1>
+                    <div class="sizing-text" id="action-sizing"></div>
+                </div>
+
+                <!-- Strategy Metrics -->
+                <div class="strategy-metrics">
+                    <div class="metric-card">
+                        <span class="metric-label">EV Estimate</span>
+                        <span class="metric-value" id="ev-estimate">0.0 BB</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Pot Odds</span>
+                        <span class="metric-value" id="pot-odds">0%</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">SPR</span>
+                        <span class="metric-value" id="spr-value">—</span>
+                    </div>
+                </div>
+
+                <div class="reasoning-box">
+                    <h3>🧠 Strategy Reasoning</h3>
+                    <p id="reasoning-text">Waiting for cards to be dealt...</p>
+                </div>
+
+                <div class="equity-box">
+                    <h3>Hand Strength</h3>
+                    <div class="hand-meta">
+                        <span class="hand-class-badge" id="hand-class">—</span>
+                        <span class="stage-badge" id="stage-badge">Preflop</span>
+                    </div>
+                    <div class="equity-meter">
+                        <div class="equity-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="equity-labels">
+                        <span>Weak</span>
+                        <span id="equity-percent">0% Equity</span>
+                        <span>Strong</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER COLUMN: Live Table State -->
+            <div class="table-panel">
+                <h2>Live Table State</h2>
+
+                <!-- The Board -->
+                <div class="board-area">
+                    <div class="section-label">Community Cards</div>
+                    <div class="cards board-cards" id="board-cards">
+                        <div class="card placeholder"></div>
+                        <div class="card placeholder"></div>
+                        <div class="card placeholder"></div>
+                        <div class="card placeholder"></div>
+                        <div class="card placeholder"></div>
+                    </div>
+                </div>
+
+                <!-- Hero Cards -->
+                <div class="hero-area">
+                    <div class="section-label">Your Hand</div>
+                    <div class="cards hero-cards" id="hero-cards">
+                        <div class="card black">?</div>
+                        <div class="card black">?</div>
+                    </div>
+                    <div class="stack-info">Stack: <span class="highlight" id="stack-display">0 BB</span></div>
+                </div>
+
+                <!-- Hand History Feed -->
+                <div class="history-panel">
+                    <div class="section-label">📜 Recent Hands</div>
+                    <div class="history-feed" id="history-feed">
+                        <div class="history-empty">No hands played yet this session.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EV GRAPH — Full Width -->
+        <div class="ev-graph-container">
+            <div class="ev-graph-header">
+                <h2>📈 Session EV & P/L Tracker</h2>
+                <div class="graph-legend">
+                    <span class="legend-item ev">■ Expected Value</span>
+                    <span class="legend-item pnl">■ Actual P/L</span>
+                </div>
+            </div>
+            <canvas id="ev-chart" height="200"></canvas>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -317,68 +317,37 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
 
 
         _x402_routes = {
-
             "POST /v1/chat/completions": RouteConfig(
-
                 accepts=[PaymentOption(
-
                     scheme="exact",
-
                     pay_to=X402_PAY_TO,
-
                     price=X402_PRICE,
-
                     network=X402_NETWORK,
-
                 )],
-
                 mime_type="application/json",
-
                 description="AI chat completions via Sovereign API",
-
             ),
-
             "POST /v1/balance/topup": RouteConfig(
-
                 accepts=[PaymentOption(
-
                     scheme="exact",
-
                     pay_to=X402_PAY_TO,
-
                     price=os.getenv("X402_TOPUP_PRICE", "$1.00"),  # Default $1.00 topup
-
                     network=X402_NETWORK,
-
                 )],
-
                 mime_type="application/json",
-
                 description="Purchase Sovereign Balance Token (Macaroon)",
-
             ),
-
             "POST /v1/key/topup": RouteConfig(
-
                 accepts=[PaymentOption(
-
                     scheme="exact",
-
                     pay_to=X402_PAY_TO,
-
                     price=os.getenv("X402_TOPUP_PRICE", "$1.00"),
-
                     network=X402_NETWORK,
-
                 )],
-
                 mime_type="application/json",
-
                 description="Fund your prepaid API key with credits",
-
             ),
-
-            # --- WHITELABEL TOOL ROUTES (Proxied from x402engine) ---
+            # --- WHITELABEL TOOL ROUTES (Registered to Bazaar) ---
             "GET /v1/tools/crypto-price": RouteConfig(
                 accepts=[PaymentOption(
                     scheme="exact",
@@ -388,6 +357,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Live crypto prices (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Crypto Price",
+                        "description": "Real-time cryptocurrency prices from multiple sources.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "ids": {"type": "string", "description": "Comma-separated list of coin IDs (e.g., 'bitcoin,ethereum')"}
+                                },
+                                "required": ["ids"]
+                            }
+                        }
+                    }
+                }
             ),
             "GET /v1/tools/web-scrape": RouteConfig(
                 accepts=[PaymentOption(
@@ -398,6 +382,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Web page scraping (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Web Scrape",
+                        "description": "Cleanly extract content from any URL into markdown/text.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "url": {"type": "string", "description": "The target website URL"}
+                                },
+                                "required": ["url"]
+                            }
+                        }
+                    }
+                }
             ),
             "POST /v1/tools/web-search": RouteConfig(
                 accepts=[PaymentOption(
@@ -408,6 +407,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Web search (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Web Search",
+                        "description": "High-quality web search results for agents.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {"type": "string", "description": "Search query text"}
+                                },
+                                "required": ["query"]
+                            }
+                        }
+                    }
+                }
             ),
             "GET /v1/tools/web-screenshot": RouteConfig(
                 accepts=[PaymentOption(
@@ -418,6 +432,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Web page screenshot (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Web Screenshot",
+                        "description": "Capture a visual snapshot of any webpage.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "url": {"type": "string", "description": "The target website URL"}
+                                },
+                                "required": ["url"]
+                            }
+                        }
+                    }
+                }
             ),
             "POST /v1/tools/image-gen": RouteConfig(
                 accepts=[PaymentOption(
@@ -428,6 +457,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="AI image generation (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Image Generation",
+                        "description": "Create stunning images from text prompts.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "prompt": {"type": "string", "description": "Visual description of the image"}
+                                },
+                                "required": ["prompt"]
+                            }
+                        }
+                    }
+                }
             ),
             "POST /v1/tools/tts": RouteConfig(
                 accepts=[PaymentOption(
@@ -438,6 +482,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Text-to-speech (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Text-to-Speech",
+                        "description": "Convert text into high-quality spoken audio.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "text": {"type": "string", "description": "The text to speak"}
+                                },
+                                "required": ["text"]
+                            }
+                        }
+                    }
+                }
             ),
             "POST /v1/tools/transcription": RouteConfig(
                 accepts=[PaymentOption(
@@ -448,6 +507,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Audio transcription (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Transcription",
+                        "description": "Convert audio files back into text accurately.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "audio_url": {"type": "string", "description": "URL to the public audio file"}
+                                },
+                                "required": ["audio_url"]
+                            }
+                        }
+                    }
+                }
             ),
             "POST /v1/tools/code-exec": RouteConfig(
                 accepts=[PaymentOption(
@@ -458,6 +532,22 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Sandboxed code execution (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Code Executor",
+                        "description": "Run untrusted Python/JS code in a safe sandbox.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {"type": "string", "description": "The source code to run"},
+                                    "language": {"type": "string", "enum": ["python", "javascript"], "default": "python"}
+                                },
+                                "required": ["code"]
+                            }
+                        }
+                    }
+                }
             ),
             "GET /v1/tools/market-data": RouteConfig(
                 accepts=[PaymentOption(
@@ -468,6 +558,18 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Market data (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Market Data",
+                        "description": "Global crypto market statistics and overview.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {}
+                            }
+                        }
+                    }
+                }
             ),
             "POST /v1/tools/wallet-balance": RouteConfig(
                 accepts=[PaymentOption(
@@ -478,6 +580,22 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Wallet balances (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Wallet Balance",
+                        "description": "Check on-chain balances across different networks.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "address": {"type": "string", "description": "EVM or BTC wallet address"},
+                                    "chain": {"type": "string", "description": "The network name (e.g., 'ethereum', 'base')"}
+                                },
+                                "required": ["address", "chain"]
+                            }
+                        }
+                    }
+                }
             ),
             "GET /v1/tools/ens-resolve": RouteConfig(
                 accepts=[PaymentOption(
@@ -488,6 +606,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="ENS resolution (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "ENS Resolver",
+                        "description": "Resolve human-readable ENS names into wallet addresses.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string", "description": "The ENS name (e.g. 'vitalik.eth')"}
+                                },
+                                "required": ["name"]
+                            }
+                        }
+                    }
+                }
             ),
             "GET /v1/tools/flight-search": RouteConfig(
                 accepts=[PaymentOption(
@@ -498,6 +631,23 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Flight search (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Flight Search",
+                        "description": "Search for real-time flight availability and pricing.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "origin": {"type": "string", "description": "Origin airport code (e.g. SFO)"},
+                                    "destination": {"type": "string", "description": "Destination airport code (e.g. LAX)"},
+                                    "departureDate": {"type": "string", "description": "YYYY-MM-DD"}
+                                },
+                                "required": ["origin", "destination", "departureDate"]
+                            }
+                        }
+                    }
+                }
             ),
             "GET /v1/tools/hotel-search": RouteConfig(
                 accepts=[PaymentOption(
@@ -508,6 +658,23 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Hotel search (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Hotel Search",
+                        "description": "Find and compare hotel room availability/prices.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "q": {"type": "string", "description": "Location or hotel name"},
+                                    "checkInDate": {"type": "string", "description": "YYYY-MM-DD"},
+                                    "checkOutDate": {"type": "string", "description": "YYYY-MM-DD"}
+                                },
+                                "required": ["q", "checkInDate", "checkOutDate"]
+                            }
+                        }
+                    }
+                }
             ),
             "POST /v1/tools/embeddings": RouteConfig(
                 accepts=[PaymentOption(
@@ -518,6 +685,21 @@ if ENABLE_X402 and X402_SDK_AVAILABLE and X402_PAY_TO and CDP_KEY:
                 )],
                 mime_type="application/json",
                 description="Text embeddings (proxied via x402engine)",
+                extensions={
+                    "bazaar": {
+                        "name": "Embeddings",
+                        "description": "Vectorize text into numerical embeddings for semantic search.",
+                        "metadata": {
+                            "input_schema": {
+                                "type": "object",
+                                "properties": {
+                                    "text": {"type": "string", "description": "The text to vectorize"}
+                                },
+                                "required": ["text"]
+                            }
+                        }
+                    }
+                }
             ),
         }
 

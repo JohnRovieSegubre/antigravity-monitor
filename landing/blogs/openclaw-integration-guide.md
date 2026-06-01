@@ -1,4 +1,8 @@
 # How to Connect OpenClaw to Sovereign API
+
+*OpenClaw agents can now call LLMs via Sovereign API's **x402 pay-per-request mode**. This guide shows how to configure OpenClaw's provider to use `https://api.sovereign-api.com/v1` and your agent's wallet key. In this setup, when an agent calls OpenAI endpoints, Sovereign API will issue a "402 Payment Required" response and the OpenClaw agent can automatically send a USDC micropayment on Base to continue the request.*
+
+
 *Published: February 27, 2026*
 
 OpenClaw is one of the most popular open-source agent orchestrators. It supports multiple LLM providers through OpenAI-compatible APIs — and Sovereign API is now a first-class citizen.
